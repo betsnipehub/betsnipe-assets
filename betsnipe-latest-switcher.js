@@ -57,6 +57,8 @@
     }
   }
 
+  window.setBetSnipeOS = setBetSnipeOS;
+
   function bindBetSnipeSwitcher() {
     var page = document.getElementById("betsnipe-app-page");
     var iosButton = document.getElementById("bs-btn-ios");
@@ -81,7 +83,6 @@
     };
 
     setBetSnipeOS("ios");
-    window.setBetSnipeOS = setBetSnipeOS;
     console.log("[BetSnipe Switcher] Loaded");
 
     return true;
