@@ -1560,3 +1560,29 @@
     width: calc(100% + 28px);
   }
 }
+
+#betsnipe-promo-page-pt {
+  display: block;
+  width: 100%;
+  max-width: none;
+  margin: 0 auto;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+#betsnipe-promo-page-pt .bs-wrapper {
+  width: min(100% - 32px, 860px);
+  max-width: 860px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+@media (max-width: 680px) {
+  #betsnipe-promo-page-pt .bs-wrapper {
+    width: 100%;
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+}
