@@ -17,7 +17,6 @@
   const closeModalBtn = modal.querySelector(".modal-close");
   const accordion = pageRoot.querySelector("#modalAccordion");
 
-  // Animações suaves no scroll
   const revealItems = pageRoot.querySelectorAll(".reveal-on-scroll");
 
   if ("IntersectionObserver" in window) {
@@ -41,7 +40,6 @@
     revealItems.forEach((item) => item.classList.add("is-visible"));
   }
 
-  // Filtro de bónus
   filterButtons.forEach((button) => {
     button.addEventListener("click", () => {
       const selected = button.dataset.filter;
@@ -62,7 +60,6 @@
     });
   });
 
-  // Modal único dinâmico
   function openModalFromCard(card) {
     modalTitle.textContent = card.dataset.modalTitle || "Bonus Lootbox";
     modalDescription.textContent = card.dataset.modalDescription || "";
@@ -129,7 +126,6 @@
     });
   }
 
-  // Scroll horizontal assistido para carrosséis mobile
   function enableHorizontalDrag(selector) {
     pageRoot.querySelectorAll(selector).forEach((scroller) => {
       let isDown = false;
@@ -180,7 +176,6 @@
 
   enableHorizontalDrag(".bonus-grid, .store-grid");
 
-  // Carrossel automático
   const carousel = pageRoot.querySelector("#heroCarousel");
   if (!carousel) return;
 
