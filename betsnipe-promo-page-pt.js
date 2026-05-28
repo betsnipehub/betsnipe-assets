@@ -61,6 +61,8 @@
   });
 
   function openModalFromCard(card) {
+    if (!card) return;
+
     modalTitle.textContent = card.dataset.modalTitle || "Bonus Lootbox";
     modalDescription.textContent = card.dataset.modalDescription || "";
 
@@ -94,7 +96,9 @@
     });
   });
 
-  closeModalBtn.addEventListener("click", closeModal);
+  if (closeModalBtn) {
+    closeModalBtn.addEventListener("click", closeModal);
+  }
 
   modal.addEventListener("click", (event) => {
     if (event.target === modal) closeModal();
@@ -116,12 +120,14 @@
 
       accordion.querySelectorAll(".acc-item").forEach((accItem) => {
         accItem.classList.remove("active");
-        accItem.querySelector(".acc-trigger span:last-child").textContent = "⌄";
+        const icon = accItem.querySelector(".acc-trigger span:last-child");
+        if (icon) icon.textContent = "⌄";
       });
 
       if (!isActive) {
         item.classList.add("active");
-        trigger.querySelector("span:last-child").textContent = "⌃";
+        const icon = trigger.querySelector("span:last-child");
+        if (icon) icon.textContent = "⌃";
       }
     });
   }
@@ -182,6 +188,8 @@
   const slides = carousel.querySelectorAll(".hero-slide");
   const dots = carousel.querySelectorAll(".carousel-dot");
 
+  if (!slides.length || !dots.length) return;
+
   let currentSlide = 0;
   let carouselTimer;
   const carouselDelay = 5000;
@@ -208,7 +216,10 @@
   }
 
   function stopCarousel() {
-    if (carouselTimer) window.clearInterval(carouselTimer);
+    if (carouselTimer) {
+      window.clearInterval(carouselTimer);
+      carouselTimer = null;
+    }
   }
 
   dots.forEach((dot) => {
@@ -222,4 +233,6 @@
   carousel.addEventListener("mouseleave", startCarousel);
 
   startCarousel();
+
+  console.log("[BetSnipe Promo PT] Loaded");
 })();
