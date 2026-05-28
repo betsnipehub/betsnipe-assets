@@ -1494,3 +1494,69 @@
         margin-right: 0 !important;
       }
     }
+
+/* WordPress layout fix */
+#betsnipe-promo-page-pt {
+  display: block;
+  width: 100%;
+  max-width: none;
+  margin: 0 auto;
+  padding: 0;
+  overflow-x: hidden;
+  background:
+    radial-gradient(circle at top left, rgba(255,63,79,.04), transparent 22%),
+    radial-gradient(circle at bottom right, rgba(255,63,79,.03), transparent 24%),
+    var(--bg);
+}
+
+#betsnipe-promo-page-pt.bs-page {
+  width: 100%;
+  max-width: none;
+  min-height: 100%;
+  background:
+    radial-gradient(circle at top left, rgba(255,63,79,.04), transparent 22%),
+    radial-gradient(circle at bottom right, rgba(255,63,79,.03), transparent 24%),
+    var(--bg);
+}
+
+#betsnipe-promo-page-pt .bs-wrapper {
+  width: min(100% - 32px, 860px);
+  max-width: 860px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 22px 0 64px;
+}
+
+#betsnipe-promo-page-pt .hero-carousel,
+#betsnipe-promo-page-pt .banner-wide,
+#betsnipe-promo-page-pt .bonus-card,
+#betsnipe-promo-page-pt .loyalty-store {
+  width: 100%;
+}
+
+#betsnipe-promo-page-pt .bonus-grid {
+  width: 100%;
+}
+
+#betsnipe-promo-page-pt img {
+  max-width: 100%;
+}
+
+@media (max-width: 900px) {
+  #betsnipe-promo-page-pt .bs-wrapper {
+    width: min(100% - 28px, 860px);
+    padding: 20px 0 56px;
+  }
+}
+
+@media (max-width: 680px) {
+  #betsnipe-promo-page-pt .bs-wrapper {
+    width: 100%;
+    padding: 14px 14px 48px;
+  }
+
+  #betsnipe-promo-page-pt .bonus-grid,
+  #betsnipe-promo-page-pt .store-grid {
+    width: calc(100% + 28px);
+  }
+}
