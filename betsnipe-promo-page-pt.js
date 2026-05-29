@@ -106,27 +106,27 @@
     }
   });
 
-  if (accordion) {
-    accordion.addEventListener("click", (event) => {
-      const trigger = event.target.closest(".acc-trigger");
-      if (!trigger) return;
+  accordion.addEventListener('click', (event) => {
+  const trigger = event.target.closest('.acc-trigger');
+  if (!trigger) return;
 
-      const item = trigger.closest(".acc-item");
-      const isActive = item.classList.contains("active");
+  const item = trigger.closest('.acc-item');
+  const isActive = item.classList.contains('active');
 
-      accordion.querySelectorAll(".acc-item").forEach((accItem) => {
-        accItem.classList.remove("active");
-        const icon = accItem.querySelector(".acc-trigger span:last-child");
-        if (icon) icon.textContent = "⌄";
-      });
+  accordion.querySelectorAll('.acc-item').forEach((accItem) => {
+    accItem.classList.remove('active');
 
-      if (!isActive) {
-        item.classList.add("active");
-        const icon = trigger.querySelector("span:last-child");
-        if (icon) icon.textContent = "⌃";
-      }
-    });
+    const accTrigger = accItem.querySelector('.acc-trigger');
+    if (accTrigger) {
+      accTrigger.setAttribute('aria-expanded', 'false');
+    }
+  });
+
+  if (!isActive) {
+    item.classList.add('active');
+    trigger.setAttribute('aria-expanded', 'true');
   }
+});
 
   function enableHorizontalDrag(selector) {
     pageRoot.querySelectorAll(selector).forEach((scroller) => {
