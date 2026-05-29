@@ -11,6 +11,7 @@
   const rewardOne = pageRoot.querySelector("#rewardOne");
   const rewardTwo = pageRoot.querySelector("#rewardTwo");
   const rewardThree = pageRoot.querySelector("#rewardThree");
+  const modalImage = pageRoot.querySelector('.modal-image-slot img');
 
   if (!modal) return;
 
@@ -41,47 +42,42 @@
   }
 
   filterButtons.forEach((button) => {
-    button.addEventListener("click", () => {
-      const selected = button.dataset.filter;
+  button.addEventListener('click', () => {
+    const selected = button.dataset.filter;
 
-      filterButtons.forEach((btn) => btn.classList.remove("active"));
-      button.classList.add("active");
+    filterButtons.forEach((btn) => btn.classList.remove('active'));
+    button.classList.add('active');
 
-      if (bonusGrid) {
-        bonusGrid.classList.toggle("is-filtered", selected !== "all");
-        bonusGrid.scrollTo({ left: 0, behavior: "smooth" });
-      }
+    if (bonusGrid) {
+      bonusGrid.classList.toggle('is-filtered', selected !== 'all');
+    }
 
-      bonusCards.forEach((card) => {
-        const categories = card.dataset.category.split(" ");
-        const shouldShow = selected === "all" || categories.includes(selected);
-        card.classList.toggle("is-hidden", !shouldShow);
-      });
+    bonusCards.forEach((card) => {
+      const categories = (card.dataset.category || '').split(' ');
+      const shouldShow = selected === 'all' || categories.includes(selected);
+      card.classList.toggle('is-hidden', !shouldShow);
     });
   });
+});
 
   function openModalFromCard(card) {
-    if (!card) return;
+  modalTitle.textContent = card.dataset.modalTitle || 'Bonus Lootbox';
+  modalDescription.textContent = card.dataset.modalDescription || '';
 
-    modalTitle.textContent = card.dataset.modalTitle || "Bonus Lootbox";
-    modalDescription.textContent = card.dataset.modalDescription || "";
+  rewardOne.textContent = card.dataset.modalReward1 || 'Texto genérico para inserir os termos principais da promoção. Use este espaço para explicar período de validade, regras gerais, limite de utilização, condições da oferta e observações importantes.';
+  rewardTwo.textContent = card.dataset.modalReward2 || 'Texto genérico para inserir as condições de elegibilidade. Use este espaço para informar quem pode participar, valor mínimo de depósito, métodos de pagamento válidos e restrições aplicáveis.';
+  rewardThree.textContent = card.dataset.modalReward3 || 'Texto genérico para inserir os requisitos de aposta. Use este espaço para explicar rollover, odds mínimas, jogos elegíveis, prazo para cumprir os requisitos e limites de levantamento.';
 
-    rewardOne.textContent =
-      card.dataset.modalReward1 ||
-      "Texto genérico para inserir os termos principais da promoção. Use este espaço para explicar período de validade, regras gerais, limite de utilização, condições da oferta e observações importantes.";
-
-    rewardTwo.textContent =
-      card.dataset.modalReward2 ||
-      "Texto genérico para inserir as condições de elegibilidade. Use este espaço para informar quem pode participar, valor mínimo de depósito, métodos de pagamento válidos e restrições aplicáveis.";
-
-    rewardThree.textContent =
-      card.dataset.modalReward3 ||
-      "Texto genérico para inserir os requisitos de aposta. Use este espaço para explicar rollover, odds mínimas, jogos elegíveis, prazo para cumprir os requisitos e limites de levantamento.";
-
-    modal.classList.add("is-open");
-    modal.setAttribute("aria-hidden", "false");
-    document.body.style.overflow = "hidden";
+  const cardImage = card.querySelector('.bonus-image img');
+  if (cardImage && modalImage) {
+    modalImage.src = cardImage.src;
+    modalImage.alt = cardImage.alt || modalTitle.textContent;
   }
+
+  modal.classList.add('is-open');
+  modal.setAttribute('aria-hidden', 'false');
+  document.body.style.overflow = 'hidden';
+}
 
   function closeModal() {
     modal.classList.remove("is-open");
