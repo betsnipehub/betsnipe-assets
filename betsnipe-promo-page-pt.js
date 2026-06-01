@@ -69,37 +69,55 @@
     firstVisibleCard.classList.add("featured");
   }
 
-  /*
-    Reset forte do carrossel.
-    Necessário porque, ao voltar de Casino para Todos,
-    o browser mantém o scroll horizontal anterior.
-  */
-  const resetBonusScroll = () => {
-    bonusGrid.scrollLeft = 0;
-    bonusGrid.scrollTo({
-      left: 0,
-      top: 0,
-      behavior: "auto"
-    });
-  };
+  function resetAllHorizontalScroll() {
+    const elementsToReset = [
+      bonusGrid,
+      pageRoot,
+      document.documentElement,
+      document.body
+    ];
 
-  resetBonusScroll();
+    let parent = bonusGrid.parentElement;
+    while (parent && parent !== document.body) {
+      elementsToReset.push(parent);
+      parent = parent.parentElement;
+    }
+
+    elementsToReset.forEach((el) => {
+      if (!el) return;
+      try {
+        el.scrollLeft = 0;
+        if (typeof el.scrollTo === "function") {
+          el.scrollTo({
+            left: 0,
+            behavior: "auto"
+          });
+        }
+      } catch (e) {}
+    });
+
+    if (firstVisibleCard && typeof firstVisibleCard.scrollIntoView === "function") {
+      firstVisibleCard.scrollIntoView({
+        behavior: "auto",
+        block: "nearest",
+        inline: "start"
+      });
+    }
+  }
+
+  resetAllHorizontalScroll();
 
   requestAnimationFrame(() => {
-    resetBonusScroll();
+    resetAllHorizontalScroll();
 
-    setTimeout(() => {
-      resetBonusScroll();
-    }, 50);
-
-    setTimeout(() => {
-      resetBonusScroll();
-    }, 150);
+    setTimeout(resetAllHorizontalScroll, 50);
+    setTimeout(resetAllHorizontalScroll, 150);
+    setTimeout(resetAllHorizontalScroll, 300);
   });
 
   console.log("[BetSnipe Promo PT] Filter applied:", selected, {
     firstVisible: firstVisibleCard?.querySelector(".bonus-title")?.textContent.trim(),
-    scrollLeft: bonusGrid.scrollLeft
+    bonusGridScrollLeft: bonusGrid.scrollLeft
   });
 }
 
