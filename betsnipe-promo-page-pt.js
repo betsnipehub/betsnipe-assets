@@ -42,21 +42,33 @@
   }
 
   filterButtons.forEach((button) => {
-  button.addEventListener('click', () => {
+  button.addEventListener("click", () => {
     const selected = button.dataset.filter;
 
-    filterButtons.forEach((btn) => btn.classList.remove('active'));
-    button.classList.add('active');
+    filterButtons.forEach((btn) => btn.classList.remove("active"));
+    button.classList.add("active");
 
     if (bonusGrid) {
-      bonusGrid.classList.toggle('is-filtered', selected !== 'all');
+      bonusGrid.classList.toggle("is-filtered", selected !== "all");
     }
 
+    let firstVisibleCard = null;
+
     bonusCards.forEach((card) => {
-      const categories = (card.dataset.category || '').split(' ');
-      const shouldShow = selected === 'all' || categories.includes(selected);
-      card.classList.toggle('is-hidden', !shouldShow);
+      const categories = (card.dataset.category || "").split(" ");
+      const shouldShow = selected === "all" || categories.includes(selected);
+
+      card.classList.toggle("is-hidden", !shouldShow);
+      card.classList.remove("bonus-card-featured");
+
+      if (shouldShow && !firstVisibleCard) {
+        firstVisibleCard = card;
+      }
     });
+
+    if (firstVisibleCard) {
+      firstVisibleCard.classList.add("bonus-card-featured");
+    }
   });
 });
 
