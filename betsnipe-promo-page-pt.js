@@ -1,6 +1,9 @@
 (function () {
   const pageRoot = document.getElementById("betsnipe-promo-page-pt");
   if (!pageRoot) return;
+  
+  if (pageRoot.dataset.betsnipePromoLoaded === "true") return;
+  pageRoot.dataset.betsnipePromoLoaded = "true";
 
   const filterButtons = pageRoot.querySelectorAll(".filter-btn");
   const bonusGrid = pageRoot.querySelector("#bonusGrid");
