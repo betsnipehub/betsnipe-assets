@@ -1,22 +1,23 @@
 (function () {
   const pageRoot = document.getElementById("betsnipe-promo-page-pt");
   if (!pageRoot) return;
-  
+
   if (pageRoot.dataset.betsnipePromoLoaded === "true") return;
   pageRoot.dataset.betsnipePromoLoaded = "true";
 
   const filterButtons = pageRoot.querySelectorAll(".filter-btn");
   const bonusGrid = pageRoot.querySelector("#bonusGrid");
   const bonusCards = bonusGrid
-  ? Array.from(bonusGrid.querySelectorAll(".bonus-card[data-category]"))
-  : [];
+    ? Array.from(bonusGrid.querySelectorAll(".bonus-card[data-category]"))
+    : [];
+
   const modal = pageRoot.querySelector("#bonusModal");
   const modalTitle = pageRoot.querySelector("#modalTitle");
   const modalDescription = pageRoot.querySelector("#modalDescription");
   const rewardOne = pageRoot.querySelector("#rewardOne");
   const rewardTwo = pageRoot.querySelector("#rewardTwo");
   const rewardThree = pageRoot.querySelector("#rewardThree");
-  const modalImage = pageRoot.querySelector('.modal-image-slot img');
+  const modalImage = pageRoot.querySelector(".modal-image-slot img");
 
   if (!modal) return;
 
@@ -46,116 +47,161 @@
     revealItems.forEach((item) => item.classList.add("is-visible"));
   }
 
-  function applyBonusFilter(selected) {
-  if (!bonusGrid) return;
+  let bonusScrollResetUntil = 0;
+  let bonusScrollResetTimer = null;
 
-  const matchingCards = [];
-  const nonMatchingCards = [];
+  function forceBonusGridStart(duration = 900) {
+    if (!bonusGrid) return;
 
-  bonusGrid.classList.toggle("is-filtered", selected !== "all");
+    bonusScrollResetUntil = Date.now() + duration;
 
-  bonusCards.forEach((card) => {
-    const categories = (card.dataset.category || "").trim().split(/\s+/);
-    const shouldShow = selected === "all" || categories.includes(selected);
+    bonusGrid.classList.add("is-resetting-scroll");
+    bonusGrid.style.scrollSnapType = "none";
+    bonusGrid.style.scrollBehavior = "auto";
 
-    card.classList.remove("featured");
-    card.classList.remove("is-hidden");
-
-    card.hidden = false;
-    card.style.removeProperty("display");
-
-    if (shouldShow) {
-      matchingCards.push(card);
-    } else {
-      card.classList.add("is-hidden");
-      card.hidden = true;
-      card.style.display = "none";
-      nonMatchingCards.push(card);
-    }
-  });
-
-  if (selected === "all") {
-    bonusCards.forEach((card) => bonusGrid.appendChild(card));
-  } else {
-    matchingCards.forEach((card) => bonusGrid.appendChild(card));
-    nonMatchingCards.forEach((card) => bonusGrid.appendChild(card));
-  }
-
-  const firstVisibleCard = selected === "all" ? bonusCards[0] : matchingCards[0];
-
-  if (firstVisibleCard) {
-    firstVisibleCard.classList.add("featured");
-  }
-
-  /*
-    Reset real do scroll horizontal.
-    O truque aqui é desligar temporariamente overflow/scroll-snap,
-    forçar reflow, repor scrollLeft e só depois reativar.
-  */
-  bonusGrid.classList.add("is-resetting-scroll");
-  bonusGrid.style.scrollSnapType = "none";
-  bonusGrid.style.overflowX = "hidden";
-  bonusGrid.scrollLeft = 0;
-
-  // força reflow
-  void bonusGrid.offsetWidth;
-
-  bonusGrid.scrollLeft = 0;
-
-  requestAnimationFrame(() => {
-    bonusGrid.scrollLeft = 0;
-
-    setTimeout(() => {
+    const reset = () => {
       bonusGrid.scrollLeft = 0;
-      bonusGrid.style.overflowX = "";
-      bonusGrid.style.scrollSnapType = "";
-      bonusGrid.classList.remove("is-resetting-scroll");
-    }, 120);
+
+      if (typeof bonusGrid.scrollTo === "function") {
+        bonusGrid.scrollTo({
+          left: 0,
+          top: 0,
+          behavior: "auto"
+        });
+      }
+    };
+
+    reset();
+
+    if (bonusScrollResetTimer) {
+      clearInterval(bonusScrollResetTimer);
+    }
+
+    bonusScrollResetTimer = setInterval(() => {
+      reset();
+
+      if (Date.now() > bonusScrollResetUntil) {
+        clearInterval(bonusScrollResetTimer);
+        bonusScrollResetTimer = null;
+
+        reset();
+
+        bonusGrid.style.scrollSnapType = "";
+        bonusGrid.style.scrollBehavior = "";
+        bonusGrid.classList.remove("is-resetting-scroll");
+      }
+    }, 16);
+  }
+
+  if (bonusGrid) {
+    bonusGrid.addEventListener(
+      "scroll",
+      () => {
+        if (Date.now() <= bonusScrollResetUntil) {
+          bonusGrid.scrollLeft = 0;
+        }
+      },
+      { passive: true }
+    );
+  }
+
+  function applyBonusFilter(selected) {
+    if (!bonusGrid) return;
+
+    const matchingCards = [];
+    const nonMatchingCards = [];
+
+    bonusGrid.classList.toggle("is-filtered", selected !== "all");
+
+    bonusCards.forEach((card) => {
+      const categories = (card.dataset.category || "").trim().split(/\s+/);
+      const shouldShow = selected === "all" || categories.includes(selected);
+
+      card.classList.remove("featured");
+      card.classList.remove("is-hidden");
+
+      card.hidden = false;
+      card.style.removeProperty("display");
+
+      if (shouldShow) {
+        matchingCards.push(card);
+      } else {
+        card.classList.add("is-hidden");
+        card.hidden = true;
+        card.style.display = "none";
+        nonMatchingCards.push(card);
+      }
+    });
+
+    if (selected === "all") {
+      bonusCards.forEach((card) => bonusGrid.appendChild(card));
+    } else {
+      matchingCards.forEach((card) => bonusGrid.appendChild(card));
+      nonMatchingCards.forEach((card) => bonusGrid.appendChild(card));
+    }
+
+    const firstVisibleCard = selected === "all" ? bonusCards[0] : matchingCards[0];
+
+    if (firstVisibleCard) {
+      firstVisibleCard.classList.add("featured");
+    }
+
+    forceBonusGridStart(900);
+
+    console.log("[BetSnipe Promo PT] Filter v76 applied:", selected, {
+      firstVisible: firstVisibleCard?.querySelector(".bonus-title")?.textContent.trim(),
+      scrollLeft: bonusGrid.scrollLeft
+    });
+  }
+
+  filterButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      const selected = button.dataset.filter;
+
+      filterButtons.forEach((btn) => btn.classList.remove("active"));
+      button.classList.add("active");
+
+      applyBonusFilter(selected);
+    });
   });
 
-  console.log("[BetSnipe Promo PT] Filter applied:", selected, {
-    firstVisible: firstVisibleCard?.querySelector(".bonus-title")?.textContent.trim(),
-    scrollLeft: bonusGrid.scrollLeft
-  });
-}
+  const activeFilterButton =
+    pageRoot.querySelector(".filter-btn.active") ||
+    pageRoot.querySelector('.filter-btn[data-filter="all"]');
 
-filterButtons.forEach((button) => {
-  button.addEventListener("click", () => {
-    const selected = button.dataset.filter;
-
-    filterButtons.forEach((btn) => btn.classList.remove("active"));
-    button.classList.add("active");
-
-    applyBonusFilter(selected);
-  });
-});
-
-const activeFilterButton =
-  pageRoot.querySelector(".filter-btn.active") ||
-  pageRoot.querySelector('.filter-btn[data-filter="all"]');
-
-if (activeFilterButton) {
-  applyBonusFilter(activeFilterButton.dataset.filter);
-}
+  if (activeFilterButton) {
+    applyBonusFilter(activeFilterButton.dataset.filter);
+  }
 
   function openModalFromCard(card) {
-  modalTitle.textContent = card.dataset.modalTitle || 'Bonus Lootbox';
-  modalDescription.textContent = card.dataset.modalDescription || '';
+    if (!card) return;
 
-  rewardOne.textContent = card.dataset.modalReward1 || 'Texto genérico para inserir os termos principais da promoção. Use este espaço para explicar período de validade, regras gerais, limite de utilização, condições da oferta e observações importantes.';
-  rewardTwo.textContent = card.dataset.modalReward2 || 'Texto genérico para inserir as condições de elegibilidade. Use este espaço para informar quem pode participar, valor mínimo de depósito, métodos de pagamento válidos e restrições aplicáveis.';
-  rewardThree.textContent = card.dataset.modalReward3 || 'Texto genérico para inserir os requisitos de aposta. Use este espaço para explicar rollover, odds mínimas, jogos elegíveis, prazo para cumprir os requisitos e limites de levantamento.';
+    modalTitle.textContent = card.dataset.modalTitle || "Bonus Lootbox";
+    modalDescription.textContent = card.dataset.modalDescription || "";
 
-  const cardImage = card.querySelector('.bonus-image img');
-  if (cardImage && modalImage) {
-    modalImage.src = cardImage.src;
-    modalImage.alt = cardImage.alt || modalTitle.textContent;
+    rewardOne.textContent =
+      card.dataset.modalReward1 ||
+      "Texto genérico para inserir os termos principais da promoção. Use este espaço para explicar período de validade, regras gerais, limite de utilização, condições da oferta e observações importantes.";
+
+    rewardTwo.textContent =
+      card.dataset.modalReward2 ||
+      "Texto genérico para inserir as condições de elegibilidade. Use este espaço para informar quem pode participar, valor mínimo de depósito, métodos de pagamento válidos e restrições aplicáveis.";
+
+    rewardThree.textContent =
+      card.dataset.modalReward3 ||
+      "Texto genérico para inserir os requisitos de aposta. Use este espaço para explicar rollover, odds mínimas, jogos elegíveis, prazo para cumprir os requisitos e limites de levantamento.";
+
+    const cardImage = card.querySelector(".bonus-image img");
+
+    if (cardImage && modalImage) {
+      modalImage.src = cardImage.src;
+      modalImage.alt = cardImage.alt || modalTitle.textContent;
+    }
+
+    modal.classList.add("is-open");
+    modal.setAttribute("aria-hidden", "false");
+    document.body.style.overflow = "hidden";
   }
-
-  modal.classList.add('is-open');
-  modal.setAttribute('aria-hidden', 'false');
-  document.body.style.overflow = 'hidden';
-}
 
   function closeModal() {
     modal.classList.remove("is-open");
@@ -184,27 +230,29 @@ if (activeFilterButton) {
     }
   });
 
-  accordion.addEventListener('click', (event) => {
-  const trigger = event.target.closest('.acc-trigger');
-  if (!trigger) return;
+  if (accordion) {
+    accordion.addEventListener("click", (event) => {
+      const trigger = event.target.closest(".acc-trigger");
+      if (!trigger) return;
 
-  const item = trigger.closest('.acc-item');
-  const isActive = item.classList.contains('active');
+      const item = trigger.closest(".acc-item");
+      const isActive = item.classList.contains("active");
 
-  accordion.querySelectorAll('.acc-item').forEach((accItem) => {
-    accItem.classList.remove('active');
+      accordion.querySelectorAll(".acc-item").forEach((accItem) => {
+        accItem.classList.remove("active");
 
-    const accTrigger = accItem.querySelector('.acc-trigger');
-    if (accTrigger) {
-      accTrigger.setAttribute('aria-expanded', 'false');
-    }
-  });
+        const accTrigger = accItem.querySelector(".acc-trigger");
+        if (accTrigger) {
+          accTrigger.setAttribute("aria-expanded", "false");
+        }
+      });
 
-  if (!isActive) {
-    item.classList.add('active');
-    trigger.setAttribute('aria-expanded', 'true');
+      if (!isActive) {
+        item.classList.add("active");
+        trigger.setAttribute("aria-expanded", "true");
+      }
+    });
   }
-});
 
   function enableHorizontalDrag(selector) {
     pageRoot.querySelectorAll(selector).forEach((scroller) => {
@@ -235,6 +283,7 @@ if (activeFilterButton) {
         if (!isDown) return;
 
         event.preventDefault();
+
         const x = event.pageX - scroller.offsetLeft;
         const walk = (x - startX) * 1.2;
         scroller.scrollLeft = scrollLeft - walk;
@@ -254,15 +303,22 @@ if (activeFilterButton) {
     });
   }
 
+  /* Não aplicar drag manual ao bonusGrid, para não interferir com o reset dos filtros */
   enableHorizontalDrag(".store-grid");
 
   const carousel = pageRoot.querySelector("#heroCarousel");
-  if (!carousel) return;
+  if (!carousel) {
+    console.log("[BetSnipe Promo PT] Loaded v76");
+    return;
+  }
 
   const slides = carousel.querySelectorAll(".hero-slide");
   const dots = carousel.querySelectorAll(".carousel-dot");
 
-  if (!slides.length || !dots.length) return;
+  if (!slides.length || !dots.length) {
+    console.log("[BetSnipe Promo PT] Loaded v76");
+    return;
+  }
 
   let currentSlide = 0;
   let carouselTimer;
@@ -308,5 +364,5 @@ if (activeFilterButton) {
 
   startCarousel();
 
-  console.log("[BetSnipe Promo PT] Loaded");
+  console.log("[BetSnipe Promo PT] Loaded v76");
 })();
