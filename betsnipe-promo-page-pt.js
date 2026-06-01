@@ -67,6 +67,7 @@
   if (firstVisibleCard) {
     firstVisibleCard.classList.add("featured");
   }
+    console.log("[BetSnipe Promo PT] Filter v67 applied:", selected);
 }
 
 filterButtons.forEach((button) => {
