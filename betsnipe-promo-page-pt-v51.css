@@ -10916,3 +10916,224 @@
     text-transform: uppercase !important;
   }
 }
+/* =========================================================
+   MOBILE — cartões de níveis com posicionamento fixo interno
+   Colar no FIM ABSOLUTO do CSS
+   ========================================================= */
+
+@media (max-width: 900px) {
+
+  #betsnipe-promo-page-pt .loyalty-store .loyalty .levels {
+    width: 340px !important;
+    max-width: calc(100vw - 72px) !important;
+    min-width: 0 !important;
+
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 14px !important;
+
+    margin: 0 auto 66px !important;
+    padding: 0 !important;
+
+    position: relative !important;
+  }
+
+  #betsnipe-promo-page-pt .loyalty-store .loyalty .levels::before {
+    content: "" !important;
+    position: absolute !important;
+    top: 78px !important;
+    bottom: 78px !important;
+    left: 50% !important;
+
+    width: 3px !important;
+    transform: translateX(-50%) !important;
+
+    background: #d9dde4 !important;
+    border-radius: 999px !important;
+    z-index: 0 !important;
+  }
+
+  #betsnipe-promo-page-pt .loyalty-store .loyalty .levels .level-card {
+    position: relative !important;
+    z-index: 1 !important;
+
+    display: block !important;
+
+    width: 100% !important;
+    height: 86px !important;
+    min-height: 86px !important;
+    max-height: 86px !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    background: #ffffff !important;
+    border: 1px solid #e1e5ec !important;
+    border-radius: 10px !important;
+    box-shadow: none !important;
+
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Ícone fixo à esquerda, centrado verticalmente */
+  #betsnipe-promo-page-pt .loyalty-store .loyalty .levels .level-icon {
+    position: absolute !important;
+    left: 24px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+
+    width: 42px !important;
+    height: 42px !important;
+    min-width: 42px !important;
+    max-width: 42px !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    overflow: visible !important;
+  }
+
+  #betsnipe-promo-page-pt .loyalty-store .loyalty .levels .level-card.vip .level-icon {
+    background: transparent !important;
+  }
+
+  #betsnipe-promo-page-pt .loyalty-store .loyalty .levels .level-icon img,
+  #betsnipe-promo-page-pt .loyalty-store .loyalty .levels .level-icon-img {
+    width: 42px !important;
+    height: 42px !important;
+    object-fit: contain !important;
+    display: block !important;
+  }
+
+  /* O wrapper deixa de controlar o layout */
+  #betsnipe-promo-page-pt .loyalty-store .loyalty .levels .level-copy {
+    position: static !important;
+    display: block !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    width: auto !important;
+    height: auto !important;
+
+    overflow: visible !important;
+    transform: none !important;
+  }
+
+  /* NÍVEL 1 / 2 / 3 / 4 */
+  #betsnipe-promo-page-pt .loyalty-store .loyalty .levels .level-label {
+    position: absolute !important;
+    left: 86px !important;
+    top: 18px !important;
+
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    color: #8b93a2 !important;
+
+    font-size: 7px !important;
+    line-height: 1 !important;
+    font-weight: 900 !important;
+    letter-spacing: 0.22em !important;
+
+    text-transform: uppercase !important;
+    text-align: left !important;
+
+    white-space: nowrap !important;
+    overflow: visible !important;
+  }
+
+  /* Bronze / Silver / Ouro / VIP */
+  #betsnipe-promo-page-pt .loyalty-store .loyalty .levels .level-name {
+    position: absolute !important;
+    left: 86px !important;
+    top: 30px !important;
+
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    color: #1f2430 !important;
+
+    font-size: 16px !important;
+    line-height: 1 !important;
+    font-weight: 900 !important;
+    letter-spacing: -0.025em !important;
+
+    text-transform: none !important;
+    text-align: left !important;
+
+    white-space: nowrap !important;
+    overflow: visible !important;
+  }
+
+  /* Badge vermelho */
+  #betsnipe-promo-page-pt .loyalty-store .loyalty .levels .level-multiplier {
+    position: absolute !important;
+    left: 86px !important;
+    top: 53px !important;
+
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: max-content !important;
+
+    height: 15px !important;
+    min-height: 15px !important;
+
+    margin: 0 !important;
+    padding: 0 7px !important;
+
+    background: #ffe4e8 !important;
+    border: 0 !important;
+    border-radius: 3px !important;
+
+    color: #ff3f4f !important;
+
+    font-size: 7px !important;
+    line-height: 1 !important;
+    font-weight: 900 !important;
+    letter-spacing: 0.04em !important;
+
+    text-transform: uppercase !important;
+    white-space: nowrap !important;
+    overflow: visible !important;
+  }
+
+  #betsnipe-promo-page-pt .loyalty-store .loyalty .levels .level-multiplier span {
+    display: inline !important;
+
+    margin: 0 0 0 3px !important;
+    padding: 0 !important;
+
+    color: #ff3f4f !important;
+
+    font-size: 7px !important;
+    line-height: 1 !important;
+    font-weight: 900 !important;
+    letter-spacing: 0.04em !important;
+
+    text-transform: uppercase !important;
+    white-space: nowrap !important;
+  }
+}
