@@ -51,10 +51,11 @@
   bonusGrid.classList.toggle("is-filtered", selected !== "all");
 
   bonusCards.forEach((card) => {
-    const categories = (card.dataset.category || "").split(" ");
+    const categories = (card.dataset.category || "").trim().split(/\s+/);
     const shouldShow = selected === "all" || categories.includes(selected);
 
     card.classList.toggle("is-hidden", !shouldShow);
+    card.hidden = !shouldShow;
     card.style.display = shouldShow ? "" : "none";
 
     card.classList.remove("featured");
@@ -67,7 +68,10 @@
   if (firstVisibleCard) {
     firstVisibleCard.classList.add("featured");
   }
-    console.log("[BetSnipe Promo PT] Filter v67 applied:", selected);
+
+  bonusGrid.scrollLeft = 0;
+
+  console.log("[BetSnipe Promo PT] Filter applied:", selected);
 }
 
 filterButtons.forEach((button) => {
