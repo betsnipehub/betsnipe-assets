@@ -54,70 +54,46 @@
     const categories = (card.dataset.category || "").trim().split(/\s+/);
     const shouldShow = selected === "all" || categories.includes(selected);
 
-    card.classList.toggle("is-hidden", !shouldShow);
-    card.hidden = !shouldShow;
-    card.style.display = shouldShow ? "" : "none";
-
     card.classList.remove("featured");
+    card.classList.remove("is-hidden");
+
+    card.hidden = false;
+    card.style.removeProperty("display");
+
+    if (!shouldShow) {
+      card.classList.add("is-hidden");
+      card.hidden = true;
+      card.style.display = "none";
+    }
 
     if (shouldShow && !firstVisibleCard) {
       firstVisibleCard = card;
     }
   });
 
+  if (selected === "all") {
+    bonusGrid.append(...bonusCards);
+    firstVisibleCard = bonusCards[0];
+  }
+
   if (firstVisibleCard) {
     firstVisibleCard.classList.add("featured");
   }
 
-  function resetAllHorizontalScroll() {
-    const elementsToReset = [
-      bonusGrid,
-      pageRoot,
-      document.documentElement,
-      document.body
-    ];
+  requestAnimationFrame(() => {
+    bonusGrid.scrollLeft = 0;
 
-    let parent = bonusGrid.parentElement;
-    while (parent && parent !== document.body) {
-      elementsToReset.push(parent);
-      parent = parent.parentElement;
-    }
-
-    elementsToReset.forEach((el) => {
-      if (!el) return;
-      try {
-        el.scrollLeft = 0;
-        if (typeof el.scrollTo === "function") {
-          el.scrollTo({
-            left: 0,
-            behavior: "auto"
-          });
-        }
-      } catch (e) {}
-    });
-
-    if (firstVisibleCard && typeof firstVisibleCard.scrollIntoView === "function") {
+    if (firstVisibleCard) {
       firstVisibleCard.scrollIntoView({
         behavior: "auto",
         block: "nearest",
         inline: "start"
       });
     }
-  }
-
-  resetAllHorizontalScroll();
-
-  requestAnimationFrame(() => {
-    resetAllHorizontalScroll();
-
-    setTimeout(resetAllHorizontalScroll, 50);
-    setTimeout(resetAllHorizontalScroll, 150);
-    setTimeout(resetAllHorizontalScroll, 300);
   });
 
   console.log("[BetSnipe Promo PT] Filter applied:", selected, {
-    firstVisible: firstVisibleCard?.querySelector(".bonus-title")?.textContent.trim(),
-    bonusGridScrollLeft: bonusGrid.scrollLeft
+    firstVisible: firstVisibleCard?.querySelector(".bonus-title")?.textContent.trim()
   });
 }
 
