@@ -69,7 +69,14 @@
     firstVisibleCard.classList.add("featured");
   }
 
-  bonusGrid.scrollLeft = 0;
+  /* força o carrossel a voltar ao primeiro card visível */
+  requestAnimationFrame(() => {
+    bonusGrid.scrollLeft = 0;
+    bonusGrid.scrollTo({
+      left: 0,
+      behavior: "auto"
+    });
+  });
 
   console.log("[BetSnipe Promo PT] Filter applied:", selected);
 }
