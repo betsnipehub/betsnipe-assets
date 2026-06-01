@@ -52,6 +52,8 @@
   const matchingCards = [];
   const nonMatchingCards = [];
 
+  bonusGrid.classList.toggle("is-filtered", selected !== "all");
+
   bonusCards.forEach((card) => {
     const categories = (card.dataset.category || "").trim().split(/\s+/);
     const shouldShow = selected === "all" || categories.includes(selected);
@@ -72,11 +74,6 @@
     }
   });
 
-  /*
-    Repor ordem visual:
-    - Em "Todos", volta à ordem original do HTML.
-    - Em "Casino" ou "Desporto", coloca primeiro os cards visíveis dessa categoria.
-  */
   if (selected === "all") {
     bonusCards.forEach((card) => bonusGrid.appendChild(card));
   } else {
@@ -90,13 +87,15 @@
     firstVisibleCard.classList.add("featured");
   }
 
-  bonusGrid.classList.toggle("is-filtered", selected !== "all");
-
   /*
-    Reset visual forte do carrossel.
+    Reset visual forte do carrossel mobile.
+    Isto força o início visual mesmo quando o browser mantém posição anterior.
   */
-  bonusGrid.style.scrollSnapType = "none";
+  bonusGrid.classList.add("is-resetting");
+
   bonusGrid.scrollLeft = 0;
+  bonusGrid.style.scrollSnapType = "none";
+  bonusGrid.style.transform = "translateX(0)";
 
   requestAnimationFrame(() => {
     bonusGrid.scrollLeft = 0;
@@ -109,17 +108,28 @@
       });
     }
 
-    requestAnimationFrame(() => {
+    setTimeout(() => {
       bonusGrid.scrollLeft = 0;
+
+      if (firstVisibleCard) {
+        firstVisibleCard.scrollIntoView({
+          behavior: "auto",
+          block: "nearest",
+          inline: "start"
+        });
+      }
+
       bonusGrid.style.scrollSnapType = "";
-    });
+      bonusGrid.classList.remove("is-resetting");
+    }, 80);
   });
 
   console.log("[BetSnipe Promo PT] Filter applied:", selected, {
     firstVisible: firstVisibleCard?.querySelector(".bonus-title")?.textContent.trim(),
     order: [...bonusGrid.querySelectorAll(".bonus-card")].map((card) =>
       card.querySelector(".bonus-title")?.textContent.trim()
-    )
+    ),
+    scrollLeft: bonusGrid.scrollLeft
   });
 }
 
