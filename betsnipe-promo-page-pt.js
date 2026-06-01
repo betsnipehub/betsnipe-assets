@@ -49,9 +49,8 @@
   function applyBonusFilter(selected) {
   if (!bonusGrid) return;
 
-  let firstVisibleCard = null;
-
-  bonusGrid.classList.toggle("is-filtered", selected !== "all");
+  const matchingCards = [];
+  const nonMatchingCards = [];
 
   bonusCards.forEach((card) => {
     const categories = (card.dataset.category || "").trim().split(/\s+/);
@@ -63,25 +62,41 @@
     card.hidden = false;
     card.style.removeProperty("display");
 
-    if (!shouldShow) {
+    if (shouldShow) {
+      matchingCards.push(card);
+    } else {
       card.classList.add("is-hidden");
       card.hidden = true;
       card.style.display = "none";
-    }
-
-    if (shouldShow && !firstVisibleCard) {
-      firstVisibleCard = card;
+      nonMatchingCards.push(card);
     }
   });
 
+  /*
+    Repor ordem visual:
+    - Em "Todos", volta à ordem original do HTML.
+    - Em "Casino" ou "Desporto", coloca primeiro os cards visíveis dessa categoria.
+  */
   if (selected === "all") {
-    bonusGrid.append(...bonusCards);
-    firstVisibleCard = bonusCards[0];
+    bonusCards.forEach((card) => bonusGrid.appendChild(card));
+  } else {
+    matchingCards.forEach((card) => bonusGrid.appendChild(card));
+    nonMatchingCards.forEach((card) => bonusGrid.appendChild(card));
   }
+
+  const firstVisibleCard = selected === "all" ? bonusCards[0] : matchingCards[0];
 
   if (firstVisibleCard) {
     firstVisibleCard.classList.add("featured");
   }
+
+  bonusGrid.classList.toggle("is-filtered", selected !== "all");
+
+  /*
+    Reset visual forte do carrossel.
+  */
+  bonusGrid.style.scrollSnapType = "none";
+  bonusGrid.scrollLeft = 0;
 
   requestAnimationFrame(() => {
     bonusGrid.scrollLeft = 0;
@@ -93,10 +108,18 @@
         inline: "start"
       });
     }
+
+    requestAnimationFrame(() => {
+      bonusGrid.scrollLeft = 0;
+      bonusGrid.style.scrollSnapType = "";
+    });
   });
 
   console.log("[BetSnipe Promo PT] Filter applied:", selected, {
-    firstVisible: firstVisibleCard?.querySelector(".bonus-title")?.textContent.trim()
+    firstVisible: firstVisibleCard?.querySelector(".bonus-title")?.textContent.trim(),
+    order: [...bonusGrid.querySelectorAll(".bonus-card")].map((card) =>
+      card.querySelector(".bonus-title")?.textContent.trim()
+    )
   });
 }
 
