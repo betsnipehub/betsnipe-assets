@@ -88,47 +88,33 @@
   }
 
   /*
-    Reset visual forte do carrossel mobile.
-    Isto força o início visual mesmo quando o browser mantém posição anterior.
+    Reset real do scroll horizontal.
+    O truque aqui é desligar temporariamente overflow/scroll-snap,
+    forçar reflow, repor scrollLeft e só depois reativar.
   */
-  bonusGrid.classList.add("is-resetting");
+  bonusGrid.classList.add("is-resetting-scroll");
+  bonusGrid.style.scrollSnapType = "none";
+  bonusGrid.style.overflowX = "hidden";
+  bonusGrid.scrollLeft = 0;
+
+  // força reflow
+  void bonusGrid.offsetWidth;
 
   bonusGrid.scrollLeft = 0;
-  bonusGrid.style.scrollSnapType = "none";
-  bonusGrid.style.transform = "translateX(0)";
 
   requestAnimationFrame(() => {
     bonusGrid.scrollLeft = 0;
 
-    if (firstVisibleCard) {
-      firstVisibleCard.scrollIntoView({
-        behavior: "auto",
-        block: "nearest",
-        inline: "start"
-      });
-    }
-
     setTimeout(() => {
       bonusGrid.scrollLeft = 0;
-
-      if (firstVisibleCard) {
-        firstVisibleCard.scrollIntoView({
-          behavior: "auto",
-          block: "nearest",
-          inline: "start"
-        });
-      }
-
+      bonusGrid.style.overflowX = "";
       bonusGrid.style.scrollSnapType = "";
-      bonusGrid.classList.remove("is-resetting");
-    }, 80);
+      bonusGrid.classList.remove("is-resetting-scroll");
+    }, 120);
   });
 
   console.log("[BetSnipe Promo PT] Filter applied:", selected, {
     firstVisible: firstVisibleCard?.querySelector(".bonus-title")?.textContent.trim(),
-    order: [...bonusGrid.querySelectorAll(".bonus-card")].map((card) =>
-      card.querySelector(".bonus-title")?.textContent.trim()
-    ),
     scrollLeft: bonusGrid.scrollLeft
   });
 }
@@ -268,7 +254,7 @@ if (activeFilterButton) {
     });
   }
 
-  enableHorizontalDrag(".bonus-grid, .store-grid");
+  enableHorizontalDrag(".store-grid");
 
   const carousel = pageRoot.querySelector("#heroCarousel");
   if (!carousel) return;
