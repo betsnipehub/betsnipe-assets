@@ -70,28 +70,37 @@
   }
 
   /*
-    Em mobile, ao mudar de filtro, força o carrossel a voltar ao início.
-    Isto é importante quando se passa de Casino para Todos.
+    Reset forte do carrossel.
+    Necessário porque, ao voltar de Casino para Todos,
+    o browser mantém o scroll horizontal anterior.
   */
-  bonusGrid.scrollLeft = 0;
+  const resetBonusScroll = () => {
+    bonusGrid.scrollLeft = 0;
+    bonusGrid.scrollTo({
+      left: 0,
+      top: 0,
+      behavior: "auto"
+    });
+  };
+
+  resetBonusScroll();
 
   requestAnimationFrame(() => {
-    bonusGrid.scrollLeft = 0;
+    resetBonusScroll();
 
-    requestAnimationFrame(() => {
-      bonusGrid.scrollLeft = 0;
+    setTimeout(() => {
+      resetBonusScroll();
+    }, 50);
 
-      if (firstVisibleCard) {
-        firstVisibleCard.scrollIntoView({
-          behavior: "auto",
-          block: "nearest",
-          inline: "start"
-        });
-      }
-    });
+    setTimeout(() => {
+      resetBonusScroll();
+    }, 150);
   });
 
-  console.log("[BetSnipe Promo PT] Filter applied:", selected);
+  console.log("[BetSnipe Promo PT] Filter applied:", selected, {
+    firstVisible: firstVisibleCard?.querySelector(".bonus-title")?.textContent.trim(),
+    scrollLeft: bonusGrid.scrollLeft
+  });
 }
 
 filterButtons.forEach((button) => {
