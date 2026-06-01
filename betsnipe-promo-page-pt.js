@@ -4,7 +4,9 @@
 
   const filterButtons = pageRoot.querySelectorAll(".filter-btn");
   const bonusGrid = pageRoot.querySelector("#bonusGrid");
-  const bonusCards = pageRoot.querySelectorAll(".bonus-card[data-category]");
+  const bonusCards = bonusGrid
+  ? Array.from(bonusGrid.querySelectorAll(".bonus-card[data-category]"))
+  : [];
   const modal = pageRoot.querySelector("#bonusModal");
   const modalTitle = pageRoot.querySelector("#modalTitle");
   const modalDescription = pageRoot.querySelector("#modalDescription");
@@ -41,36 +43,50 @@
     revealItems.forEach((item) => item.classList.add("is-visible"));
   }
 
-  filterButtons.forEach((button) => {
+  function applyBonusFilter(selected) {
+  if (!bonusGrid) return;
+
+  let firstVisibleCard = null;
+
+  bonusGrid.classList.toggle("is-filtered", selected !== "all");
+
+  bonusCards.forEach((card) => {
+    const categories = (card.dataset.category || "").split(" ");
+    const shouldShow = selected === "all" || categories.includes(selected);
+
+    card.classList.toggle("is-hidden", !shouldShow);
+    card.style.display = shouldShow ? "" : "none";
+
+    card.classList.remove("featured");
+
+    if (shouldShow && !firstVisibleCard) {
+      firstVisibleCard = card;
+    }
+  });
+
+  if (firstVisibleCard) {
+    firstVisibleCard.classList.add("featured");
+  }
+}
+
+filterButtons.forEach((button) => {
   button.addEventListener("click", () => {
     const selected = button.dataset.filter;
 
     filterButtons.forEach((btn) => btn.classList.remove("active"));
     button.classList.add("active");
 
-    if (bonusGrid) {
-      bonusGrid.classList.toggle("is-filtered", selected !== "all");
-    }
-
-    let firstVisibleCard = null;
-
-    bonusCards.forEach((card) => {
-      const categories = (card.dataset.category || "").split(" ");
-      const shouldShow = selected === "all" || categories.includes(selected);
-
-      card.classList.toggle("is-hidden", !shouldShow);
-      card.classList.remove("bonus-card-featured");
-
-      if (shouldShow && !firstVisibleCard) {
-        firstVisibleCard = card;
-      }
-    });
-
-    if (firstVisibleCard) {
-      firstVisibleCard.classList.add("bonus-card-featured");
-    }
+    applyBonusFilter(selected);
   });
 });
+
+const activeFilterButton =
+  pageRoot.querySelector(".filter-btn.active") ||
+  pageRoot.querySelector('.filter-btn[data-filter="all"]');
+
+if (activeFilterButton) {
+  applyBonusFilter(activeFilterButton.dataset.filter);
+}
 
   function openModalFromCard(card) {
   modalTitle.textContent = card.dataset.modalTitle || 'Bonus Lootbox';
