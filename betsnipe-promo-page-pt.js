@@ -69,12 +69,25 @@
     firstVisibleCard.classList.add("featured");
   }
 
-  /* força o carrossel a voltar ao primeiro card visível */
+  /*
+    Em mobile, ao mudar de filtro, força o carrossel a voltar ao início.
+    Isto é importante quando se passa de Casino para Todos.
+  */
+  bonusGrid.scrollLeft = 0;
+
   requestAnimationFrame(() => {
     bonusGrid.scrollLeft = 0;
-    bonusGrid.scrollTo({
-      left: 0,
-      behavior: "auto"
+
+    requestAnimationFrame(() => {
+      bonusGrid.scrollLeft = 0;
+
+      if (firstVisibleCard) {
+        firstVisibleCard.scrollIntoView({
+          behavior: "auto",
+          block: "nearest",
+          inline: "start"
+        });
+      }
     });
   });
 
