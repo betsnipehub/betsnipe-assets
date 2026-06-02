@@ -1,0 +1,1752 @@
+/* =========================================================
+   01. Tokens / Base
+   ========================================================= */
+
+#betsnipe-promo-page-pt {
+  --brand: #ff3f4f;
+  --brand-dark: #8b001f;
+  --text: #343743;
+  --text-dark: #171c29;
+  --muted: #5f6675;
+  --bg: #eef3f8;
+  --card: #ffffff;
+  --line: #cfd5de;
+  --soft-line: #d7dce4;
+  --pink-soft: #ffe4e8;
+  --shadow-soft: 0 10px 35px rgba(18, 24, 38, .05);
+  --shadow-card: 0 16px 35px rgba(31, 42, 68, .06);
+
+  position: relative;
+  display: block;
+  width: 100vw;
+  max-width: none;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+  padding: 0;
+  overflow-x: hidden;
+  background:
+    radial-gradient(circle at top left, rgba(255, 63, 79, .04), transparent 22%),
+    radial-gradient(circle at bottom right, rgba(255, 63, 79, .03), transparent 24%),
+    var(--bg);
+  color: var(--text);
+  font-family: "Noto Sans", Arial, Helvetica, sans-serif;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: geometricPrecision;
+}
+
+#betsnipe-promo-page-pt,
+#betsnipe-promo-page-pt * {
+  box-sizing: border-box;
+}
+
+#betsnipe-promo-page-pt * {
+  margin: 0;
+  padding: 0;
+}
+
+#betsnipe-promo-page-pt a {
+  color: inherit;
+  text-decoration: none;
+}
+
+#betsnipe-promo-page-pt img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  object-fit: cover;
+}
+
+#betsnipe-promo-page-pt button,
+#betsnipe-promo-page-pt input,
+#betsnipe-promo-page-pt textarea,
+#betsnipe-promo-page-pt select {
+  font-family: inherit;
+}
+
+#betsnipe-promo-page-pt > p:empty,
+#betsnipe-promo-page-pt p:empty,
+#betsnipe-promo-page-pt > br {
+  display: none !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  max-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  line-height: 0 !important;
+  overflow: hidden !important;
+}
+
+#betsnipe-promo-page-pt .bs-wrapper {
+  width: min(100% - 48px, 860px);
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 24px 0 72px;
+}
+
+/* Remove unwanted italic on promo cards and store cards */
+#betsnipe-promo-page-pt .bonus-card,
+#betsnipe-promo-page-pt .bonus-card *,
+#betsnipe-promo-page-pt .store-card,
+#betsnipe-promo-page-pt .store-card * {
+  font-style: normal !important;
+}
+
+/* =========================================================
+   02. Buttons
+   ========================================================= */
+
+#betsnipe-promo-page-pt .btn-primary,
+#betsnipe-promo-page-pt .btn-text {
+  border: 0;
+  cursor: pointer;
+  font-size: 10px;
+  line-height: 1;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: uppercase;
+  transition: .2s ease;
+  white-space: nowrap;
+}
+
+#betsnipe-promo-page-pt .btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 108px;
+  min-height: 40px;
+  padding: 12px 22px;
+  border-radius: 6px;
+  background: var(--brand);
+  color: #ffffff;
+  box-shadow: 0 12px 24px rgba(255, 63, 79, .16);
+}
+
+#betsnipe-promo-page-pt .btn-primary:hover {
+  background: #e92c3d;
+}
+
+#betsnipe-promo-page-pt .btn-text {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0;
+  background: transparent;
+  color: #4c5160;
+}
+
+/* =========================================================
+   03. Hero carousel
+   ========================================================= */
+
+#betsnipe-promo-page-pt .hero-carousel {
+  position: relative;
+  width: 100%;
+  height: 180px;
+  margin: 0 0 34px;
+  overflow: hidden;
+  border-radius: 0;
+  background: #111827;
+  box-shadow: none;
+}
+
+#betsnipe-promo-page-pt .hero-slide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  visibility: hidden;
+  transform: scale(1.025);
+  transition: opacity 700ms ease, visibility 700ms ease, transform 1200ms ease;
+}
+
+#betsnipe-promo-page-pt .hero-slide.is-active {
+  z-index: 1;
+  opacity: 1;
+  visibility: visible;
+  transform: scale(1);
+}
+
+#betsnipe-promo-page-pt .hero-slide img {
+  object-position: center center;
+}
+
+#betsnipe-promo-page-pt .carousel-dots {
+  position: absolute;
+  left: 50%;
+  bottom: 18px;
+  z-index: 3;
+  display: flex;
+  gap: 8px;
+  transform: translateX(-50%);
+}
+
+#betsnipe-promo-page-pt .carousel-dot {
+  width: 8px;
+  height: 8px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .55);
+  cursor: pointer;
+  transition: .2s ease;
+}
+
+#betsnipe-promo-page-pt .carousel-dot.is-active {
+  background: #ffffff;
+  transform: scale(1.18);
+}
+
+/* =========================================================
+   04. Header / Filter switch
+   ========================================================= */
+
+#betsnipe-promo-page-pt .section-head {
+  position: relative;
+  top: auto;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin: 0 0 34px;
+  padding: 0 0 20px;
+  border-bottom: 1px solid var(--soft-line);
+  background: transparent;
+  backdrop-filter: none;
+}
+
+#betsnipe-promo-page-pt .section-head h1 {
+  color: #333640;
+  font-size: 25px;
+  line-height: 1.1;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+}
+
+#betsnipe-promo-page-pt .filters {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  margin-left: auto;
+  padding: 6px;
+  border: 1px solid var(--soft-line);
+  border-radius: 999px;
+  background: var(--bg);
+  box-shadow: none;
+}
+
+#betsnipe-promo-page-pt .filter-btn {
+  min-width: 110px;
+  height: 42px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: #343743;
+  font-size: 12px;
+  line-height: 1;
+  font-weight: 800;
+  letter-spacing: 0;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: none;
+}
+
+#betsnipe-promo-page-pt .filter-btn.active,
+#betsnipe-promo-page-pt .filter-btn:hover {
+  background: var(--brand);
+  color: #ffffff;
+  box-shadow: 0 8px 18px rgba(255, 63, 79, .18);
+}
+
+/* =========================================================
+   05. Bonus cards
+   ========================================================= */
+
+#betsnipe-promo-page-pt .bonus-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+  width: 100%;
+  margin: 0;
+}
+
+#betsnipe-promo-page-pt .bonus-card {
+  position: relative;
+  overflow: hidden;
+  min-height: 330px;
+  border: 1px solid rgba(255, 90, 105, .26);
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: none;
+  transition: opacity .25s ease, transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+}
+
+#betsnipe-promo-page-pt .bonus-card.is-hidden,
+#betsnipe-promo-page-pt .bonus-card[hidden] {
+  display: none !important;
+}
+
+#betsnipe-promo-page-pt .bonus-card:hover {
+  box-shadow: 0 12px 30px rgba(18, 24, 38, .08);
+}
+
+#betsnipe-promo-page-pt .bonus-card.featured {
+  grid-column: span 3;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 290px;
+}
+
+#betsnipe-promo-page-pt .bonus-grid.is-filtered .bonus-card,
+#betsnipe-promo-page-pt .bonus-grid.is-filtered .bonus-card.featured {
+  grid-column: auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 330px;
+}
+
+#betsnipe-promo-page-pt .bonus-image {
+  min-height: 172px;
+  background: #111827;
+}
+
+#betsnipe-promo-page-pt .bonus-card.featured .bonus-image {
+  min-height: 290px;
+}
+
+#betsnipe-promo-page-pt .bonus-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center center;
+}
+
+#betsnipe-promo-page-pt .bonus-content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 36px 38px 34px;
+}
+
+#betsnipe-promo-page-pt .bonus-card:not(.featured) .bonus-content,
+#betsnipe-promo-page-pt .bonus-grid.is-filtered .bonus-card .bonus-content {
+  padding: 20px 22px 22px;
+  justify-content: flex-start;
+  flex: 1;
+}
+
+#betsnipe-promo-page-pt .bonus-kicker {
+  display: block;
+  margin: 0 0 14px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--brand);
+  font-size: 11px;
+  line-height: 1.1;
+  font-weight: 700;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+}
+
+#betsnipe-promo-page-pt .bonus-title {
+  margin: 0 0 16px;
+  color: #343744;
+  font-size: 24px;
+  line-height: .98;
+  font-weight: 700;
+  font-style: normal !important;
+  letter-spacing: -0.045em;
+  text-transform: uppercase;
+}
+
+#betsnipe-promo-page-pt .bonus-card.featured .bonus-title {
+  font-size: 26px;
+  margin-bottom: 18px;
+}
+
+#betsnipe-promo-page-pt .bonus-card:not(.featured) .bonus-title {
+  min-height: 42px;
+  font-size: 21px;
+  line-height: .98;
+}
+
+#betsnipe-promo-page-pt .bonus-description {
+  max-width: 300px;
+  margin: 0 0 20px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.45;
+  font-weight: 400;
+}
+
+#betsnipe-promo-page-pt .bonus-actions {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+  margin-top: auto;
+}
+
+/* =========================================================
+   06. Cashback card
+   ========================================================= */
+
+#betsnipe-promo-page-pt .bonus-card.cashback-card,
+#betsnipe-promo-page-pt .bonus-card.featured.cashback-card {
+  width: 100%;
+  margin: 28px 0 0;
+  border-radius: 8px;
+}
+
+#betsnipe-promo-page-pt .cashback-card .bonus-actions,
+#betsnipe-promo-page-pt .cashback-card .modal-open-btn,
+#betsnipe-promo-page-pt .cashback-card .btn-primary,
+#betsnipe-promo-page-pt .cashback-card .btn-text {
+  display: none !important;
+}
+
+#betsnipe-promo-page-pt .cashback-card .bonus-content {
+  padding: 26px 40px 30px;
+  justify-content: flex-start;
+}
+
+#betsnipe-promo-page-pt .cashback-card .bonus-kicker {
+  margin: 0 0 10px;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: .18em;
+}
+
+#betsnipe-promo-page-pt .cashback-card .bonus-title {
+  margin: 0 0 18px;
+  color: var(--brand);
+  font-size: 28px;
+  line-height: .95;
+  font-weight: 800;
+}
+
+#betsnipe-promo-page-pt .cashback-card .bonus-description {
+  max-width: 470px;
+  margin: 0 0 18px;
+  color: var(--muted);
+  font-size: 15px;
+}
+
+#betsnipe-promo-page-pt .cashback-table {
+  width: 100%;
+  max-width: 500px;
+  margin: 0;
+  border-top: 0;
+}
+
+#betsnipe-promo-page-pt .cashback-head,
+#betsnipe-promo-page-pt .cashback-row {
+  display: grid;
+  grid-template-columns: 1fr 150px;
+  align-items: center;
+  gap: 8px;
+}
+
+#betsnipe-promo-page-pt .cashback-head {
+  padding: 0 0 10px;
+  color: #343743;
+  font-size: 12px;
+  line-height: 1.2;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+#betsnipe-promo-page-pt .cashback-head span:last-child {
+  padding-left: 22px;
+}
+
+#betsnipe-promo-page-pt .cashback-row {
+  min-height: auto;
+  padding: 18px 0;
+  border-top: 0;
+  border-bottom: 1px solid var(--soft-line);
+  color: #697184;
+  font-size: 18px;
+}
+
+#betsnipe-promo-page-pt .cashback-row:last-child {
+  border-bottom: 0;
+  padding-bottom: 6px;
+}
+
+#betsnipe-promo-page-pt .cashback-range {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+#betsnipe-promo-page-pt .cashback-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  min-width: 46px;
+  border-radius: 50%;
+  background: #ffe5e8;
+  color: var(--brand);
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 24px;
+  line-height: 1;
+  font-weight: 800;
+}
+
+#betsnipe-promo-page-pt .cashback-label {
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.35;
+  font-weight: 400;
+}
+
+#betsnipe-promo-page-pt .cashback-percent {
+  padding-left: 22px;
+  border-left: 1px solid var(--soft-line);
+  color: var(--brand);
+  font-size: 28px;
+  line-height: 1;
+  font-weight: 800;
+  text-align: left;
+}
+
+/* =========================================================
+   07. Loyalty / levels
+   ========================================================= */
+
+#betsnipe-promo-page-pt .loyalty-store {
+  width: 100%;
+  margin-top: 52px;
+  padding: 42px 38px 40px;
+  overflow: hidden;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+#betsnipe-promo-page-pt .loyalty,
+#betsnipe-promo-page-pt .points-store {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+#betsnipe-promo-page-pt .loyalty h2,
+#betsnipe-promo-page-pt .points-store h2 {
+  margin: 0;
+  color: var(--text-dark);
+  font-size: 20px;
+  line-height: 1.15;
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  text-align: center;
+}
+
+#betsnipe-promo-page-pt .loyalty > p {
+  max-width: 520px;
+  margin: 8px auto 28px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.45;
+  font-weight: 400;
+  text-align: center;
+}
+
+#betsnipe-promo-page-pt .levels {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 34px;
+  margin: 50px 0 32px;
+  align-items: start;
+}
+
+#betsnipe-promo-page-pt .levels::before {
+  content: "";
+  position: absolute;
+  top: 30px;
+  left: 88px;
+  right: 88px;
+  z-index: 0;
+  height: 4px;
+  border-radius: 999px;
+  background: #d7dbe2;
+}
+
+#betsnipe-promo-page-pt .level-card {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  text-align: center;
+}
+
+#betsnipe-promo-page-pt .level-card p:empty,
+#betsnipe-promo-page-pt .level-copy p:empty {
+  display: none !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  line-height: 0 !important;
+}
+
+#betsnipe-promo-page-pt .level-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+  margin: 0 auto 14px;
+  padding: 10px;
+  overflow: hidden;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 6px 16px rgba(26, 34, 56, .08);
+}
+
+#betsnipe-promo-page-pt .level-icon img,
+#betsnipe-promo-page-pt .level-icon-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+#betsnipe-promo-page-pt .level-card.vip .level-icon {
+  background: #126c77;
+}
+
+#betsnipe-promo-page-pt .level-label {
+  margin: 0 0 8px;
+  color: #343743;
+  font-size: 8px;
+  line-height: 8px;
+  font-weight: 600;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+
+#betsnipe-promo-page-pt .level-name {
+  margin: 0 0 12px;
+  color: #202534;
+  font-size: 18px;
+  line-height: 1;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+#betsnipe-promo-page-pt .level-multiplier {
+  display: block;
+  width: 102px;
+  min-height: 52px;
+  margin: 0 auto;
+  padding: 8px 6px 6px;
+  border: 1px solid #f7bcc5;
+  border-radius: 5px;
+  background: #ffe5e8;
+  color: var(--brand);
+  font-size: 24px;
+  line-height: .9;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+}
+
+#betsnipe-promo-page-pt .level-multiplier span {
+  display: block;
+  margin-top: 5px;
+  color: #343743;
+  font-size: 8px;
+  line-height: 8px;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+/* =========================================================
+   08. How it works
+   ========================================================= */
+
+#betsnipe-promo-page-pt .how-box {
+  position: relative;
+  z-index: 5;
+  display: grid;
+  grid-template-columns: 220px 1px 76px 1fr;
+  align-items: center;
+  column-gap: 34px;
+  width: 100%;
+  max-width: 760px;
+  min-height: 106px;
+  margin: 36px auto 0;
+  padding: 24px 34px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: transparent;
+  text-align: left;
+  overflow: visible;
+}
+
+#betsnipe-promo-page-pt .how-cta-wrap {
+  grid-column: 1;
+  grid-row: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+#betsnipe-promo-page-pt .how-cta-wrap .btn-primary {
+  width: 185px;
+  min-width: 185px;
+  max-width: 185px;
+  height: 46px;
+  min-height: 46px;
+  max-height: 46px;
+  padding: 0 24px;
+  border-radius: 5px;
+  font-size: 11px;
+  font-weight: 700;
+  box-shadow: 0 13px 24px rgba(255, 63, 79, .22);
+}
+
+#betsnipe-promo-page-pt .how-box .divider {
+  grid-column: 2;
+  grid-row: 1;
+  display: block;
+  width: 1px;
+  height: 54px;
+  background: var(--line);
+}
+
+#betsnipe-promo-page-pt .how-content {
+  grid-column: 3 / 5;
+  grid-row: 1;
+  display: grid;
+  grid-template-columns: 76px 1fr;
+  align-items: center;
+  column-gap: 24px;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  text-align: left;
+}
+
+#betsnipe-promo-page-pt .star-round {
+  grid-column: 1;
+  grid-row: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 58px;
+  height: 58px;
+  min-width: 58px;
+  max-width: 58px;
+  border-radius: 50%;
+  background: #ffe1e6;
+  color: var(--brand);
+  font-size: 28px;
+  line-height: 1;
+}
+
+#betsnipe-promo-page-pt .how-copy {
+  grid-column: 2;
+  grid-row: 1;
+  max-width: 390px;
+  width: 100%;
+  text-align: left;
+}
+
+#betsnipe-promo-page-pt .how-copy h3,
+#betsnipe-promo-page-pt .how-content h3 {
+  margin: 0 0 8px;
+  color: #171c29;
+  font-size: 23px;
+  line-height: 1;
+  font-weight: 900;
+  letter-spacing: -0.045em;
+  text-align: left;
+}
+
+#betsnipe-promo-page-pt .how-copy p,
+#betsnipe-promo-page-pt .how-content p {
+  max-width: 390px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.35;
+  font-weight: 400;
+  text-align: left;
+}
+
+/* =========================================================
+   09. Points store
+   ========================================================= */
+
+#betsnipe-promo-page-pt .loyalty-store-divider {
+  display: none;
+}
+
+#betsnipe-promo-page-pt .points-store {
+  margin: 44px 0 0;
+}
+
+#betsnipe-promo-page-pt .store-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 22px;
+  margin: 0 0 26px;
+  padding: 0;
+  border: 0;
+  text-align: left;
+}
+
+#betsnipe-promo-page-pt .store-head h2 {
+  margin: 0;
+  color: #202534;
+  font-size: 18px;
+  line-height: 1.1;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+#betsnipe-promo-page-pt .store-head .btn-primary {
+  width: 185px;
+  min-width: 185px;
+  max-width: 185px;
+  height: 46px;
+  min-height: 46px;
+  max-height: 46px;
+  padding: 0 24px;
+  border-radius: 5px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+#betsnipe-promo-page-pt .store-cta-mobile {
+  display: none !important;
+}
+
+#betsnipe-promo-page-pt .store-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  text-align: left;
+}
+
+#betsnipe-promo-page-pt .store-card {
+  overflow: hidden;
+  border: 1px solid #e4e7ee;
+  border-radius: 14px;
+  background: #ffffff;
+  box-shadow: 0 10px 28px rgba(31, 42, 68, .06);
+}
+
+#betsnipe-promo-page-pt .store-img {
+  display: block;
+  width: 100%;
+  height: 160px;
+  overflow: hidden;
+  border-radius: 14px 14px 0 0;
+  background: #9c0028;
+  color: #ffffff;
+  font-size: 40px;
+  font-weight: 700;
+  transform: none;
+}
+
+#betsnipe-promo-page-pt .store-img img,
+#betsnipe-promo-page-pt .store-card-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center center;
+}
+
+#betsnipe-promo-page-pt .store-info {
+  padding: 18px 16px 18px;
+  text-align: left;
+}
+
+#betsnipe-promo-page-pt .store-info small {
+  display: block;
+  margin: 0 0 10px;
+  color: var(--brand);
+  font-size: 9px;
+  line-height: 1;
+  font-weight: 600;
+  letter-spacing: .20em;
+  text-transform: uppercase;
+}
+
+#betsnipe-promo-page-pt .store-info h3 {
+  margin: 0 0 10px;
+  color: var(--text-dark);
+  font-size: 15px;
+  line-height: 1.05;
+  font-weight: 700;
+  font-style: normal !important;
+  letter-spacing: -0.035em;
+  text-transform: uppercase;
+}
+
+#betsnipe-promo-page-pt .store-info p {
+  margin: 0 0 12px;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.45;
+  font-weight: 400;
+}
+
+#betsnipe-promo-page-pt .points {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 5px;
+  width: auto;
+  max-width: max-content;
+  margin: 12px 0 0;
+  padding: 0;
+  color: #697287;
+  font-size: 13px;
+  line-height: 1;
+  font-weight: 400;
+  text-align: left;
+  white-space: nowrap;
+  text-indent: 0;
+}
+
+#betsnipe-promo-page-pt .points::before,
+#betsnipe-promo-page-pt .points::after {
+  display: none !important;
+  content: none !important;
+}
+
+#betsnipe-promo-page-pt .points-value {
+  color: #202534;
+  font-size: 13px;
+  line-height: 1;
+  font-weight: 700;
+  margin-left: -8px;
+}
+
+#betsnipe-promo-page-pt .points-icon {
+  display: inline-block;
+  width: 13px;
+  height: 13px;
+  min-width: 13px;
+  object-fit: contain;
+}
+
+#betsnipe-promo-page-pt .points-label {
+  color: #697287;
+  font-size: 13px;
+  line-height: 1;
+  font-weight: 400;
+}
+
+/* =========================================================
+   10. Modal / Popup
+   ========================================================= */
+
+#betsnipe-promo-page-pt .modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(17, 19, 27, .62);
+  backdrop-filter: blur(6px);
+}
+
+#betsnipe-promo-page-pt .modal-backdrop.is-open {
+  display: flex;
+}
+
+#betsnipe-promo-page-pt .bonus-modal {
+  position: relative;
+  width: min(100%, 650px);
+  max-height: calc(100vh - 48px);
+  overflow: hidden;
+  border-radius: 22px;
+  background: #ffffff;
+  box-shadow: 0 32px 90px rgba(0, 0, 0, .28);
+  animation: betsnipeModalIn .2s ease both;
+}
+
+@keyframes betsnipeModalIn {
+  from { opacity: 0; transform: translateY(18px) scale(.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+#betsnipe-promo-page-pt .modal-scroll {
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
+  border-radius: 22px;
+}
+
+#betsnipe-promo-page-pt .modal-visual {
+  width: 100%;
+  height: auto;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background: #101827;
+}
+
+#betsnipe-promo-page-pt .modal-image-slot {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 300px;
+  min-height: 300px;
+  max-height: 300px;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background: #101827;
+}
+
+#betsnipe-promo-page-pt .modal-image-slot img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  object-fit: cover;
+  object-position: center top;
+  filter: none;
+}
+
+#betsnipe-promo-page-pt .modal-image-slot img[src*="Bonus-primeiro-deposito-desportes"] {
+  object-position: center 18%;
+}
+
+#betsnipe-promo-page-pt .modal-close {
+  position: absolute;
+  top: 16px;
+  right: 18px;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  background: transparent;
+  color: #ffffff;
+  font-size: 36px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+#betsnipe-promo-page-pt .modal-content,
+#betsnipe-promo-page-pt .modal-body {
+  padding: 28px 72px 40px;
+  background: #ffffff;
+  text-align: center;
+}
+
+#betsnipe-promo-page-pt .modal-title {
+  margin: 0 0 20px;
+  color: #262a35;
+  font-size: 25px;
+  line-height: 1.1;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+}
+
+#betsnipe-promo-page-pt .modal-description {
+  margin: 0 0 24px;
+  color: #555a67;
+  font-size: 15px;
+  line-height: 1.55;
+  text-align: left;
+}
+
+#betsnipe-promo-page-pt .modal-subtitle {
+  margin: 0 0 14px;
+  color: #262a35;
+  font-size: 16px;
+  font-weight: 900;
+}
+
+#betsnipe-promo-page-pt .accordion {
+  margin-bottom: 30px;
+  text-align: left;
+}
+
+#betsnipe-promo-page-pt .acc-item {
+  margin-bottom: 7px;
+  overflow: hidden;
+  border-radius: 9px;
+  background: #f0f1f3;
+}
+
+#betsnipe-promo-page-pt .acc-item.active {
+  background: #dcdee3;
+}
+
+#betsnipe-promo-page-pt .acc-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 50px;
+  padding: 15px 14px;
+  border: 0;
+  border-radius: 0;
+  background: #ececef;
+  color: #41444f;
+  font-size: 15px;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+}
+
+#betsnipe-promo-page-pt .acc-item.active .acc-trigger {
+  background: #dcdee3;
+}
+
+#betsnipe-promo-page-pt .acc-content {
+  display: none;
+  padding: 10px 14px 17px;
+  background: #dcdee3;
+  color: #5a5f6d;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+#betsnipe-promo-page-pt .acc-item.active .acc-content {
+  display: block;
+}
+
+#betsnipe-promo-page-pt .modal-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+#betsnipe-promo-page-pt .modal-open-btn,
+#betsnipe-promo-page-pt .modal-outline-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 130px;
+  height: 41px;
+  border-radius: 7px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+#betsnipe-promo-page-pt .modal-open-btn {
+  border: 0;
+  background: linear-gradient(90deg, var(--brand-dark), var(--brand));
+  color: #ffffff;
+}
+
+#betsnipe-promo-page-pt .modal-outline-btn {
+  border: 2px solid var(--brand-dark);
+  background: #ffffff;
+  color: var(--brand-dark);
+}
+
+/* =========================================================
+   11. Motion
+   ========================================================= */
+
+#betsnipe-promo-page-pt .reveal-on-scroll {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 700ms ease, transform 700ms ease;
+  will-change: opacity, transform;
+}
+
+#betsnipe-promo-page-pt .reveal-on-scroll.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+#betsnipe-promo-page-pt .reveal-delay-1 { transition-delay: 80ms; }
+#betsnipe-promo-page-pt .reveal-delay-2 { transition-delay: 160ms; }
+#betsnipe-promo-page-pt .reveal-delay-3 { transition-delay: 240ms; }
+
+@media (prefers-reduced-motion: reduce) {
+  #betsnipe-promo-page-pt .reveal-on-scroll,
+  #betsnipe-promo-page-pt .hero-slide,
+  #betsnipe-promo-page-pt .bonus-card,
+  #betsnipe-promo-page-pt .store-card,
+  #betsnipe-promo-page-pt .btn-primary,
+  #betsnipe-promo-page-pt .btn-text {
+    transition: none !important;
+    animation: none !important;
+    transform: none !important;
+  }
+}
+
+/* =========================================================
+   12. Tablet
+   ========================================================= */
+
+@media (max-width: 900px) {
+  #betsnipe-promo-page-pt {
+    width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  #betsnipe-promo-page-pt .bs-wrapper {
+    width: 100%;
+    padding: 14px 14px 48px;
+  }
+
+  #betsnipe-promo-page-pt .section-head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 18px;
+    margin: 24px 0 20px;
+    padding-bottom: 0;
+    border-bottom: 0;
+  }
+
+  #betsnipe-promo-page-pt .section-head h1 {
+    font-size: 22px;
+  }
+
+  #betsnipe-promo-page-pt .section-head .filters,
+  #betsnipe-promo-page-pt .filters {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  #betsnipe-promo-page-pt .filter-btn {
+    flex: 1;
+    min-width: 0;
+  }
+
+  #betsnipe-promo-page-pt .hero-carousel {
+    height: auto;
+    aspect-ratio: 16 / 9;
+    margin-bottom: 24px;
+    border-radius: 0;
+  }
+}
+
+/* =========================================================
+   13. Mobile
+   ========================================================= */
+
+@media (max-width: 900px) {
+  /* Bonus carousel */
+  #betsnipe-promo-page-pt #bonusGrid,
+  #betsnipe-promo-page-pt .bonus-grid {
+    display: flex;
+    flex-wrap: nowrap;
+    width: 100%;
+    max-width: 100%;
+    gap: 20px;
+    margin: 0;
+    padding: 0 28px 10px 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: auto;
+    scrollbar-width: none;
+    touch-action: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: auto;
+    overscroll-behavior-y: auto;
+  }
+
+  #betsnipe-promo-page-pt #bonusGrid::-webkit-scrollbar,
+  #betsnipe-promo-page-pt .bonus-grid::-webkit-scrollbar,
+  #betsnipe-promo-page-pt .store-grid::-webkit-scrollbar {
+    display: none;
+  }
+
+  #betsnipe-promo-page-pt #bonusGrid.is-resetting-scroll {
+    scroll-snap-type: none;
+    scroll-behavior: auto;
+  }
+
+  #betsnipe-promo-page-pt #bonusGrid .bonus-card.reveal-on-scroll,
+  #betsnipe-promo-page-pt #bonusGrid .bonus-card.reveal-delay-1,
+  #betsnipe-promo-page-pt #bonusGrid .bonus-card.reveal-delay-2,
+  #betsnipe-promo-page-pt #bonusGrid .bonus-card.reveal-delay-3 {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+  }
+
+  #betsnipe-promo-page-pt #bonusGrid .bonus-card,
+  #betsnipe-promo-page-pt #bonusGrid .bonus-card.featured,
+  #betsnipe-promo-page-pt .bonus-grid .bonus-card,
+  #betsnipe-promo-page-pt .bonus-grid .bonus-card.featured {
+    display: flex;
+    flex: 0 0 calc(100vw - 104px);
+    flex-direction: column;
+    width: calc(100vw - 104px);
+    min-width: 280px;
+    max-width: calc(100vw - 104px);
+    min-height: 0;
+    border-radius: 8px;
+    overflow: hidden;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+  }
+
+  #betsnipe-promo-page-pt #bonusGrid .bonus-card.is-hidden,
+  #betsnipe-promo-page-pt #bonusGrid .bonus-card[hidden] {
+    display: none !important;
+  }
+
+  #betsnipe-promo-page-pt #bonusGrid .bonus-card .bonus-image,
+  #betsnipe-promo-page-pt #bonusGrid .bonus-card.featured .bonus-image {
+    width: 100%;
+    height: 240px;
+    min-height: 240px;
+    max-height: 240px;
+    overflow: hidden;
+    background: #101827;
+  }
+
+  #betsnipe-promo-page-pt #bonusGrid .bonus-card .bonus-content,
+  #betsnipe-promo-page-pt #bonusGrid .bonus-card.featured .bonus-content {
+    display: block;
+    height: auto;
+    min-height: 0;
+    padding: 30px 32px 16px;
+  }
+
+  #betsnipe-promo-page-pt #bonusGrid .bonus-card .bonus-kicker,
+  #betsnipe-promo-page-pt #bonusGrid .bonus-card.featured .bonus-kicker {
+    margin: 0 0 18px;
+    font-size: 11px;
+    line-height: 1.1;
+    font-weight: 500;
+    letter-spacing: .26em;
+  }
+
+  #betsnipe-promo-page-pt #bonusGrid .bonus-card .bonus-title,
+  #betsnipe-promo-page-pt #bonusGrid .bonus-card.featured .bonus-title {
+    min-height: 0;
+    margin: 0 0 24px;
+    font-size: 24px;
+    line-height: 1.02;
+    font-weight: 900;
+    letter-spacing: -0.035em;
+  }
+
+  #betsnipe-promo-page-pt #bonusGrid .bonus-card .bonus-description,
+  #betsnipe-promo-page-pt #bonusGrid .bonus-card.featured .bonus-description {
+    margin: 0 0 26px;
+    font-size: 16px;
+    line-height: 1.45;
+  }
+
+  #betsnipe-promo-page-pt #bonusGrid .bonus-card .bonus-actions,
+  #betsnipe-promo-page-pt #bonusGrid .bonus-card.featured .bonus-actions {
+    gap: 26px;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Cashback mobile */
+  #betsnipe-promo-page-pt .bonus-card.cashback-card,
+  #betsnipe-promo-page-pt .bonus-card.featured.cashback-card {
+    display: block !important;
+    width: 100%;
+    min-width: 100%;
+    max-width: 100%;
+    flex: none;
+    margin: 24px 0 0;
+  }
+
+  #betsnipe-promo-page-pt .cashback-card .bonus-content {
+    padding: 24px 24px 26px;
+  }
+
+  #betsnipe-promo-page-pt .cashback-head,
+  #betsnipe-promo-page-pt .cashback-row {
+    grid-template-columns: 1fr .88fr;
+    column-gap: 12px;
+  }
+
+  #betsnipe-promo-page-pt .cashback-row > div:last-child {
+    padding-left: 10px;
+  }
+
+  #betsnipe-promo-page-pt .cashback-percent {
+    padding-left: 14px;
+  }
+
+  /* Loyalty mobile */
+  #betsnipe-promo-page-pt .loyalty-store {
+    width: 100%;
+    margin-top: 24px;
+    padding: 0 4px 28px;
+    background: transparent;
+  }
+
+  #betsnipe-promo-page-pt .loyalty h2 {
+    margin: 0 0 14px;
+    font-size: 20px;
+    line-height: 1.15;
+  }
+
+  #betsnipe-promo-page-pt .loyalty > p {
+    max-width: 320px;
+    margin: 0 auto 22px;
+    font-size: 13px;
+    line-height: 1.35;
+  }
+
+  #betsnipe-promo-page-pt .levels {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    width: calc(100vw - 32px);
+    max-width: calc(100vw - 32px);
+    margin: 0 auto 34px;
+    padding: 0;
+  }
+
+  #betsnipe-promo-page-pt .levels::before {
+    display: none;
+  }
+
+  #betsnipe-promo-page-pt .level-card {
+    display: grid;
+    grid-template-columns: 52px 1fr;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 16px;
+    width: 100%;
+    min-height: 74px;
+    height: 74px;
+    padding: 0 18px;
+    border: 1px solid #e4e8ef;
+    border-radius: 15px;
+    background: #ffffff;
+    text-align: left;
+    box-shadow: 0 10px 25px rgba(31, 42, 68, .04);
+  }
+
+  #betsnipe-promo-page-pt .level-icon {
+    width: 42px;
+    height: 42px;
+    min-width: 42px;
+    margin: 0;
+    padding: 0;
+    align-self: center;
+  }
+
+  #betsnipe-promo-page-pt .level-copy {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    text-align: left;
+  }
+
+  #betsnipe-promo-page-pt .level-label,
+  html body #betsnipe-promo-page-pt .level-card .level-label {
+    margin: 0 0 4px;
+    color: #343743;
+    font-size: 8px !important;
+    line-height: 8px !important;
+    font-weight: 800;
+    letter-spacing: .22em;
+  }
+
+  #betsnipe-promo-page-pt .level-name {
+    margin: 0 0 7px;
+    font-size: 16px;
+    line-height: 1;
+  }
+
+  #betsnipe-promo-page-pt .level-multiplier,
+  html body #betsnipe-promo-page-pt .level-card .level-multiplier {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    width: auto;
+    min-height: 0;
+    margin: 0;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 8px !important;
+    line-height: 8px !important;
+    font-weight: 800;
+    letter-spacing: 0;
+  }
+
+  #betsnipe-promo-page-pt .level-multiplier span,
+  html body #betsnipe-promo-page-pt .level-card .level-multiplier span {
+    display: inline-block;
+    margin: 0;
+    padding: 0;
+    color: var(--brand);
+    font-size: 8px !important;
+    line-height: 8px !important;
+    font-weight: 800;
+    letter-spacing: 0;
+    text-transform: none;
+  }
+
+  /* How mobile */
+  #betsnipe-promo-page-pt .how-box.how-box-mobile-final,
+  #betsnipe-promo-page-pt .loyalty-store .loyalty .how-box.how-box-mobile-final {
+    position: relative;
+    display: grid;
+    grid-template-rows: auto auto;
+    row-gap: 28px;
+    justify-items: center;
+    align-items: start;
+    width: calc(100vw - 32px);
+    max-width: calc(100vw - 32px);
+    min-height: 252px;
+    height: auto;
+    margin: 0 auto 44px;
+    padding: 62px 22px 30px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: transparent;
+    text-align: center;
+    overflow: visible;
+  }
+
+  #betsnipe-promo-page-pt .how-box.how-box-mobile-final .star-round {
+    position: absolute;
+    top: -24px;
+    left: 50%;
+    width: 48px;
+    height: 48px;
+    min-width: 48px;
+    min-height: 48px;
+    max-width: 48px;
+    max-height: 48px;
+    border-radius: 50%;
+    transform: translateX(-50%);
+    aspect-ratio: 1 / 1;
+  }
+
+  #betsnipe-promo-page-pt .how-box.how-box-mobile-final .how-content {
+    grid-row: 1;
+    display: block;
+    width: 100%;
+    max-width: 270px;
+    margin: 0 auto;
+    padding: 0;
+    position: static;
+    transform: none;
+    text-align: center;
+  }
+
+  #betsnipe-promo-page-pt .how-box.how-box-mobile-final .how-copy {
+    width: 100%;
+    max-width: 270px;
+    margin: 0 auto;
+    padding: 0;
+    text-align: center;
+  }
+
+  #betsnipe-promo-page-pt .how-box.how-box-mobile-final .how-copy h3,
+  #betsnipe-promo-page-pt .how-box.how-box-mobile-final .how-content h3 {
+    display: block;
+    width: 100%;
+    margin: 0 0 14px;
+    padding: 0;
+    font-size: 23px;
+    line-height: 1.02;
+    font-weight: 900;
+    letter-spacing: -0.045em;
+    text-align: center;
+    text-indent: 0;
+  }
+
+  #betsnipe-promo-page-pt .how-box.how-box-mobile-final .how-copy p,
+  #betsnipe-promo-page-pt .how-box.how-box-mobile-final .how-content p {
+    max-width: 255px;
+    margin: 0 auto;
+    padding: 0;
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.22;
+    font-weight: 400;
+    text-align: center;
+  }
+
+  #betsnipe-promo-page-pt .how-box.how-box-mobile-final .how-cta-wrap {
+    grid-row: 2;
+    grid-column: 1 / -1;
+    position: static;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    justify-self: center;
+    width: 100%;
+    margin: 0 auto;
+    padding: 0;
+    transform: none;
+    text-align: center;
+  }
+
+  #betsnipe-promo-page-pt .how-box.how-box-mobile-final .how-cta-wrap .btn-primary {
+    display: inline-flex;
+    width: 168px;
+    min-width: 168px;
+    max-width: 168px;
+    height: 44px;
+    min-height: 44px;
+    max-height: 44px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+
+  #betsnipe-promo-page-pt .how-box.how-box-mobile-final .divider {
+    display: none;
+  }
+
+  /* Store mobile */
+  #betsnipe-promo-page-pt .points-store {
+    margin-top: 0;
+    padding-top: 0;
+  }
+
+  #betsnipe-promo-page-pt .store-head {
+    flex-direction: row;
+    align-items: center;
+    gap: 0;
+    margin-bottom: 22px;
+  }
+
+  #betsnipe-promo-page-pt .store-head .btn-primary {
+    display: inline-flex;
+    width: 168px;
+    min-width: 168px;
+    max-width: 168px;
+    height: 44px;
+    min-height: 44px;
+  }
+
+  #betsnipe-promo-page-pt .store-grid {
+    display: flex;
+    flex-wrap: nowrap;
+    width: calc(100% + 28px);
+    max-width: none;
+    gap: 14px;
+    margin: 0 -14px;
+    padding: 0 14px 16px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  #betsnipe-promo-page-pt .store-card {
+    flex: 0 0 82%;
+    min-width: 82%;
+    max-width: 82%;
+    scroll-snap-align: start;
+  }
+
+  #betsnipe-promo-page-pt .store-img {
+    height: 210px;
+  }
+
+  #betsnipe-promo-page-pt .store-info {
+    padding: 26px 34px 30px;
+  }
+
+  /* Modal mobile */
+  #betsnipe-promo-page-pt .modal-backdrop {
+    align-items: flex-end;
+    padding: 12px;
+  }
+
+  #betsnipe-promo-page-pt .bonus-modal {
+    width: 100%;
+    max-height: calc(100vh - 24px);
+    border-radius: 22px;
+  }
+
+  #betsnipe-promo-page-pt .modal-scroll {
+    max-height: calc(100vh - 24px);
+    border-radius: 22px;
+  }
+
+  #betsnipe-promo-page-pt .modal-image-slot {
+    height: 220px;
+    min-height: 220px;
+    max-height: 220px;
+  }
+
+  #betsnipe-promo-page-pt .modal-content,
+  #betsnipe-promo-page-pt .modal-body {
+    padding: 24px 20px 30px;
+  }
+
+  #betsnipe-promo-page-pt .modal-title {
+    margin-bottom: 16px;
+    font-size: 23px;
+  }
+
+  #betsnipe-promo-page-pt .modal-description,
+  #betsnipe-promo-page-pt .acc-content,
+  #betsnipe-promo-page-pt .acc-trigger {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 380px) {
+  #betsnipe-promo-page-pt #bonusGrid .bonus-card,
+  #betsnipe-promo-page-pt #bonusGrid .bonus-card.featured,
+  #betsnipe-promo-page-pt .bonus-grid .bonus-card,
+  #betsnipe-promo-page-pt .bonus-grid .bonus-card.featured,
+  #betsnipe-promo-page-pt .store-card {
+    flex-basis: 92%;
+    min-width: 92%;
+    max-width: 92%;
+  }
+
+  #betsnipe-promo-page-pt .bonus-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  #betsnipe-promo-page-pt .btn-primary,
+  #betsnipe-promo-page-pt .btn-text {
+    width: 100%;
+    text-align: center;
+  }
+}
