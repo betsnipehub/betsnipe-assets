@@ -106,53 +106,43 @@
   }
 
   function applyBonusFilter(selected) {
-    if (!bonusGrid) return;
+  if (!bonusGrid) return;
 
-    const matchingCards = [];
-    const nonMatchingCards = [];
+  let firstVisibleCard = null;
 
-    bonusGrid.classList.toggle("is-filtered", selected !== "all");
+  bonusGrid.classList.toggle("is-filtered", selected !== "all");
 
-    bonusCards.forEach((card) => {
-      const categories = (card.dataset.category || "").trim().split(/\s+/);
-      const shouldShow = selected === "all" || categories.includes(selected);
+  bonusCards.forEach((card) => {
+    const categories = (card.dataset.category || "").trim().split(/\s+/);
+    const shouldShow = selected === "all" || categories.includes(selected);
 
-      card.classList.remove("featured");
-      card.classList.remove("is-hidden");
+    card.classList.remove("is-hidden", "is-top-bonus");
+    card.hidden = false;
+    card.style.removeProperty("display");
 
-      card.hidden = false;
-      card.style.removeProperty("display");
-
-      if (shouldShow) {
-        matchingCards.push(card);
-      } else {
-        card.classList.add("is-hidden");
-        card.hidden = true;
-        card.style.display = "none";
-        nonMatchingCards.push(card);
-      }
-    });
-
-    if (selected === "all") {
-      bonusCards.forEach((card) => bonusGrid.appendChild(card));
-    } else {
-      matchingCards.forEach((card) => bonusGrid.appendChild(card));
-      nonMatchingCards.forEach((card) => bonusGrid.appendChild(card));
+    if (!shouldShow) {
+      card.classList.add("is-hidden");
+      card.hidden = true;
+      card.style.display = "none";
+      return;
     }
 
-    const firstVisibleCard = selected === "all" ? bonusCards[0] : matchingCards[0];
-
-    if (firstVisibleCard) {
-      firstVisibleCard.classList.add("featured");
+    if (!firstVisibleCard) {
+      firstVisibleCard = card;
     }
+  });
 
-    forceBonusGridStart(900);
-
-    console.log("[BetSnipe Promo PT] Filter v76 applied:", selected, {
-      firstVisible: firstVisibleCard?.querySelector(".bonus-title")?.textContent.trim(),
-      scrollLeft: bonusGrid.scrollLeft
-    });
+  if (firstVisibleCard) {
+    firstVisibleCard.classList.add("is-top-bonus");
   }
+
+  forceBonusGridStart(900);
+
+  console.log("[BetSnipe Promo PT] Filter applied:", selected, {
+    firstVisible: firstVisibleCard?.querySelector(".bonus-title")?.textContent.trim(),
+    scrollLeft: bonusGrid.scrollLeft
+  });
+}
 
   filterButtons.forEach((button) => {
     button.addEventListener("click", () => {
