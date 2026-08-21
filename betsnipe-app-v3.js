@@ -1,0 +1,1406 @@
+/*!
+ * BetSnipe - App page controller
+ * v3.0.0
+ *
+ *  1. OS switcher (iOS / Android) + mobile carousel   [carried over from v2]
+ *  2. PWA install: platform detection + install popup + native browser prompt
+ *
+ * The origin already ships everything a PWA needs, so no Angular changes are
+ * required:
+ *   manifest : /favicon/site.webmanifest  (scope "/", display "fullscreen")
+ *   worker   : /ngsw-worker.js            (scope "/", registered on mobile)
+ * Because of that, Chromium fires `beforeinstallprompt` and we can call the
+ * real native install dialog. iOS has no such API, so it gets guided steps.
+ *
+ * WHERE TO LOAD THIS
+ * Preferably once, site wide, in <head> (defer is fine):
+ *
+ *   <script defer src=".../betsnipe-app-v3.js?v=2"></script>
+ *
+ * Chromium fires `beforeinstallprompt` once per page load, and only while no
+ * listener has consumed it. The whole site is one Angular app, so a visitor
+ * who lands on the homepage and then routes to /app has already passed that
+ * moment - a script tag that only exists inside the app-page block never sees
+ * the event, and those visitors drop to manual steps instead of the one-tap
+ * installer. Loading site wide fixes that.
+ *
+ * It is safe on every page: nothing renders and no popup is scheduled until
+ * the #betsnipe-app-page block is present, it leaves no permanent timers, and
+ * it re-binds itself when the SPA routes into the app page later on.
+ *
+ * Loading it from the app-page block instead still works - only the Android
+ * one-tap path degrades.
+ */
+(function () {
+  "use strict";
+
+  var VERSION = "3.0.0";
+
+  /* ------------------------------------------------------------------ *
+   * 0. Re-entry guard
+   *    The CMS re-inserts this <script> on every SPA navigation to the
+   *    app page, which re-executes the file. Re-bind instead of stacking
+   *    duplicate listeners, timers and overlays.
+   * ------------------------------------------------------------------ */
+  if (window.__betsnipeApp && window.__betsnipeApp.version === VERSION) {
+    window.__betsnipeApp.boot();
+    return;
+  }
+
+  /* ------------------------------------------------------------------ *
+   * 1. beforeinstallprompt capture
+   *    Registered before anything else in this file. Chromium fires the
+   *    event once per page load, and only while nothing has consumed it,
+   *    so the listener has to exist before the event arrives. The same
+   *    globals are written by the optional <head> stub, whichever runs
+   *    first wins and the other is a no-op.
+   * ------------------------------------------------------------------ */
+  function getPrompt() {
+    return window.__bsBIP || null;
+  }
+
+  function setPrompt(event) {
+    window.__bsBIP = event || null;
+  }
+
+  if (!window.__bsBIPBound) {
+    window.__bsBIPBound = true;
+
+    window.addEventListener("beforeinstallprompt", function (event) {
+      // Suppress Chrome's own mini-infobar; we drive the UI ourselves.
+      event.preventDefault();
+      setPrompt(event);
+      try {
+        window.dispatchEvent(new CustomEvent("bs:installable"));
+      } catch (e) {}
+    });
+
+    window.addEventListener("appinstalled", function () {
+      setPrompt(null);
+      store.set(KEY_INSTALLED, "1");
+      try {
+        window.dispatchEvent(new CustomEvent("bs:installed"));
+      } catch (e) {}
+    });
+  }
+
+  /* ------------------------------------------------------------------ *
+   * 2. Storage
+   * ------------------------------------------------------------------ */
+  var KEY_SNOOZE = "bs_pwa_snooze_until";
+  var KEY_INSTALLED = "bs_pwa_installed";
+
+  var store = {
+    get: function (key) {
+      try {
+        return window.localStorage.getItem(key);
+      } catch (e) {
+        return null;
+      }
+    },
+    set: function (key, value) {
+      try {
+        window.localStorage.setItem(key, value);
+      } catch (e) {}
+    },
+    remove: function (key) {
+      try {
+        window.localStorage.removeItem(key);
+      } catch (e) {}
+    }
+  };
+
+  /* ------------------------------------------------------------------ *
+   * 3. Environment detection
+   * ------------------------------------------------------------------ */
+  var UA = navigator.userAgent || "";
+
+  var env = {};
+
+  // iPadOS 13+ reports a desktop Mac UA, so fall back to the touch count.
+  env.ios =
+    /iPad|iPhone|iPod/.test(UA) ||
+    (/Macintosh/.test(UA) && navigator.maxTouchPoints > 1);
+  env.android = /Android/i.test(UA);
+  env.mobile = env.ios || env.android || /Mobile|Tablet/i.test(UA);
+
+  // Social / messenger webviews cannot install anything at all.
+  env.inAppBrowser =
+    /FBAN|FBAV|FB_IAB|Instagram|Messenger|Line\/|Twitter|TikTok|Pinterest|Snapchat|WhatsApp|MicroMessenger|GSA\//i.test(
+      UA
+    ) || (env.android && /;\s*wv\)/i.test(UA));
+
+  // On iOS only Safari has a dependable "Add to Home Screen" flow.
+  env.iosSafari =
+    env.ios &&
+    !env.inAppBrowser &&
+    !/CriOS|FxiOS|EdgiOS|OPiOS|OPT\//i.test(UA);
+
+  function isInstalled() {
+    // The manifest declares display:fullscreen, so an installed launch
+    // reports fullscreen rather than standalone. Check every app-like mode.
+    var modes = ["standalone", "fullscreen", "minimal-ui", "window-controls-overlay"];
+
+    try {
+      if (navigator.standalone === true) return true;
+
+      for (var i = 0; i < modes.length; i++) {
+        if (window.matchMedia("(display-mode: " + modes[i] + ")").matches) {
+          return true;
+        }
+      }
+    } catch (e) {}
+
+    return (document.referrer || "").indexOf("android-app://") === 0;
+  }
+
+  function resolveMode() {
+    if (isInstalled()) return "installed";
+    if (env.inAppBrowser) return "inapp";
+    if (getPrompt()) return "native";
+    if (env.ios) return env.iosSafari ? "ios" : "ios-other";
+    if (env.android) return "android-manual";
+    return "desktop";
+  }
+
+  /* ------------------------------------------------------------------ *
+   * 4. Copy
+   * ------------------------------------------------------------------ */
+  // Resolved on every render, not once at load. This file loads site wide, so
+  // the locale at script-execution time is the landing page's, not the one the
+  // visitor is looking at after the SPA has routed them somewhere else.
+  function localeKey() {
+    var match = location.pathname.match(/^\/([a-z]{2})(?:\/|$)/i);
+    var lang = (match && match[1]) || document.documentElement.lang || "en";
+
+    return lang.slice(0, 2).toLowerCase() === "pt" ? "pt" : "en";
+  }
+
+  var COPY = {
+    en: {
+      ctaLabel: "Install the app",
+      close: "Close",
+      copied: "Link copied",
+      brandSub: "Sports & Casino",
+      installing: "Opening installer...",
+      modes: {
+        native: {
+          title: "Install the BetSnipe app",
+          body: "Add BetSnipe to your home screen and open Sports & Casino in one tap.",
+          primary: "Install app",
+          secondary: "Not now"
+        },
+        ios: {
+          title: "Add BetSnipe to your Home Screen",
+          body: "Three quick steps in Safari:",
+          steps: [
+            'Tap the Share icon in the Safari toolbar.',
+            'Scroll and choose "Add to Home Screen".',
+            'Tap "Add" to finish.'
+          ],
+          primary: "Got it",
+          secondary: "See full guide"
+        },
+        "ios-other": {
+          title: "Open in Safari to install",
+          body: "Adding BetSnipe to your Home Screen works from Safari. Open this page there and the Share menu will offer it.",
+          primary: "Copy link",
+          secondary: "Not now"
+        },
+        inapp: {
+          title: "Open in your browser",
+          body: "You are browsing inside another app, which cannot install web apps. Open this page in Chrome or Safari to continue.",
+          primary: "Copy link",
+          secondary: "Not now"
+        },
+        "android-manual": {
+          title: "Add BetSnipe to your Home Screen",
+          body: "Three quick steps in your browser:",
+          steps: [
+            "Tap the menu button in your browser.",
+            'Choose "Install app" or "Add to Home screen".',
+            "Confirm to finish."
+          ],
+          primary: "Got it",
+          secondary: "See full guide"
+        },
+        desktop: {
+          title: "Install on your phone",
+          body: "The BetSnipe app installs from your phone. Open this page on mobile and we will walk you through it.",
+          primary: "Copy link",
+          secondary: "Not now"
+        },
+        installed: {
+          title: "The app is already installed",
+          body: "BetSnipe is on your home screen. Open it any time straight from the app icon.",
+          primary: "Close"
+        },
+        success: {
+          title: "App installed",
+          body: "BetSnipe is now on your home screen. Open it any time straight from the app icon.",
+          primary: "Done"
+        }
+      }
+    },
+    pt: {
+      ctaLabel: "Instalar a app",
+      close: "Fechar",
+      copied: "Link copiado",
+      brandSub: "Desporto e Casino",
+      installing: "A abrir o instalador...",
+      modes: {
+        native: {
+          title: "Instala a app BetSnipe",
+          body: "Adiciona a BetSnipe ao ecrã principal e abre Desporto e Casino em 1 toque.",
+          primary: "Instalar app",
+          secondary: "Agora não"
+        },
+        ios: {
+          title: "Adiciona a BetSnipe ao ecrã principal",
+          body: "Três passos rápidos no Safari:",
+          steps: [
+            "Toca no ícone Partilhar na barra do Safari.",
+            'Desliza e escolhe "Adicionar ao ecrã principal".',
+            'Toca em "Adicionar" para finalizar.'
+          ],
+          primary: "Entendi",
+          secondary: "Ver guia completo"
+        },
+        "ios-other": {
+          title: "Abre no Safari para instalar",
+          body: "Adicionar a BetSnipe ao ecrã principal funciona no Safari. Abre esta página no Safari e o menu Partilhar mostra a opção.",
+          primary: "Copiar link",
+          secondary: "Agora não"
+        },
+        inapp: {
+          title: "Abre no teu navegador",
+          body: "Estás a navegar dentro de outra app, que não permite instalar web apps. Abre esta página no Chrome ou Safari para continuar.",
+          primary: "Copiar link",
+          secondary: "Agora não"
+        },
+        "android-manual": {
+          title: "Adiciona a BetSnipe ao ecrã principal",
+          body: "Três passos rápidos no teu navegador:",
+          steps: [
+            "Toca no botão de menu do navegador.",
+            'Escolhe "Instalar app" ou "Adicionar ao ecrã principal".',
+            "Confirma para finalizar."
+          ],
+          primary: "Entendi",
+          secondary: "Ver guia completo"
+        },
+        desktop: {
+          title: "Instala no teu telemóvel",
+          body: "A app BetSnipe instala-se a partir do telemóvel. Abre esta página no móvel e explicamos-te o resto.",
+          primary: "Copiar link",
+          secondary: "Agora não"
+        },
+        installed: {
+          title: "A app já está instalada",
+          body: "A BetSnipe está no teu ecrã principal. Abre a qualquer momento pelo ícone da app.",
+          primary: "Fechar"
+        },
+        success: {
+          title: "App instalada",
+          body: "A BetSnipe está agora no teu ecrã principal. Abre a qualquer momento pelo ícone da app.",
+          primary: "Concluído"
+        }
+      }
+    }
+  };
+
+  var A11Y_COPY = {
+    en: { prev: "Previous step", next: "Next step", nav: "Installation steps" },
+    pt: { prev: "Passo anterior", next: "Próximo passo", nav: "Passos de instalação" }
+  };
+
+  // T and A11Y always hold the copy for the current URL. refreshLocale() runs
+  // at the top of everything that renders text.
+  var T = COPY[localeKey()];
+  var A11Y = A11Y_COPY[localeKey()];
+
+  function refreshLocale() {
+    var key = localeKey();
+
+    T = COPY[key];
+    A11Y = A11Y_COPY[key];
+
+    return key;
+  }
+
+  /* ------------------------------------------------------------------ *
+   * 5. Shared constants
+   * ------------------------------------------------------------------ */
+  var BRAND = "#fe3f48";
+  var MUTED = "#64748b";
+  var APP_ICON = "/favicon/web-app-manifest-192x192.png";
+  var Z = 2147483000;
+
+  var AUTO_DELAY_IOS = 2600;
+  var AUTO_DELAY_ANDROID = 6000; // let the late service worker fire BIP first
+  var SNOOZE_DAYS = 7;
+  var SNOOZE_DAYS_AFTER_DECLINE = 1;
+
+  var DEBUG =
+    /[?&]bsdebug=1/.test(location.search) ||
+    store.get("bs_pwa_debug") === "1";
+
+  function log() {
+    if (!DEBUG) return;
+    try {
+      console.log.apply(
+        console,
+        ["[BetSnipe PWA]"].concat(Array.prototype.slice.call(arguments))
+      );
+    } catch (e) {}
+  }
+
+  /* ================================================================== *
+   * PART A - OS switcher + mobile carousel
+   * ================================================================== */
+
+  var currentOS = "ios";
+  var carouselIndex = { ios: 0, android: 0 };
+
+  function isMobileViewport() {
+    return window.matchMedia("(max-width: 768px)").matches;
+  }
+
+  function getActiveSteps() {
+    return document.getElementById(
+      currentOS === "android" ? "bs-steps-android" : "bs-steps-ios"
+    );
+  }
+
+  function getCards(steps) {
+    return steps
+      ? Array.prototype.slice.call(steps.querySelectorAll("article"))
+      : [];
+  }
+
+  function styleButton(button, active) {
+    if (!button) return;
+
+    button.style.setProperty("border", "0", "important");
+    button.style.setProperty("cursor", "pointer", "important");
+    button.style.setProperty("padding", "8px 24px", "important");
+    button.style.setProperty("border-radius", "12px", "important");
+    button.style.setProperty("font-family", "inherit", "important");
+    button.style.setProperty("font-weight", "500", "important");
+    button.style.setProperty("font-size", "16px", "important");
+    button.style.setProperty("transition", "all .2s ease", "important");
+
+    if (active) {
+      button.style.setProperty("background", BRAND, "important");
+      button.style.setProperty("color", "#ffffff", "important");
+      button.style.setProperty(
+        "box-shadow",
+        "0 4px 3px rgba(0,0,0,0.10),0 2px 2px rgba(0,0,0,0.10)",
+        "important"
+      );
+    } else {
+      button.style.setProperty("background", "transparent", "important");
+      button.style.setProperty("color", MUTED, "important");
+      button.style.setProperty("box-shadow", "none", "important");
+    }
+  }
+
+  function getArrowSvg(direction) {
+    var path =
+      direction === "left"
+        ? "M11.75 4.5L6.25 10L11.75 15.5"
+        : "M8.25 4.5L13.75 10L8.25 15.5";
+
+    return (
+      '<svg width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden="true" style="display:block;">' +
+      '<path d="' +
+      path +
+      '" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path></svg>'
+    );
+  }
+
+  function createCarouselControls() {
+    refreshLocale();
+
+    if (document.getElementById("bs-carousel-controls")) return;
+
+    var target =
+      document.getElementById("bs-steps-android") ||
+      document.getElementById("bs-steps-ios");
+
+    if (!target || !target.parentNode) return;
+
+    target.parentNode.style.position = "relative";
+
+    var controls = document.createElement("div");
+    controls.id = "bs-carousel-controls";
+    controls.setAttribute("aria-label", A11Y.nav);
+    controls.style.cssText = [
+      "display:none",
+      "position:absolute",
+      "left:0",
+      "right:0",
+      "top:50%",
+      "transform:translateY(-50%)",
+      "justify-content:space-between",
+      "align-items:center",
+      "padding:0 10px",
+      "pointer-events:none",
+      "z-index:5"
+    ].join(";");
+
+    var arrowCss = [
+      "width:44px",
+      "height:44px",
+      "border-radius:999px",
+      "border:0",
+      "background:#e5e7eb",
+      "color:#6b7280",
+      "display:flex",
+      "align-items:center",
+      "justify-content:center",
+      "cursor:pointer",
+      "box-shadow:0 4px 12px rgba(0,0,0,.10)",
+      "pointer-events:auto",
+      "transition:all .2s ease"
+    ].join(";");
+
+    var prev = document.createElement("button");
+    prev.id = "bs-carousel-prev";
+    prev.type = "button";
+    prev.setAttribute("aria-label", A11Y.prev);
+    prev.innerHTML = getArrowSvg("left");
+    prev.style.cssText = arrowCss;
+
+    var next = document.createElement("button");
+    next.id = "bs-carousel-next";
+    next.type = "button";
+    next.setAttribute("aria-label", A11Y.next);
+    next.innerHTML = getArrowSvg("right");
+    next.style.cssText = arrowCss;
+
+    prev.addEventListener("click", function () {
+      moveCarousel(-1);
+    });
+
+    next.addEventListener("click", function () {
+      moveCarousel(1);
+    });
+
+    controls.appendChild(prev);
+    controls.appendChild(next);
+
+    target.parentNode.insertBefore(controls, target.nextSibling);
+  }
+
+  function positionCarouselControls() {
+    var controls = document.getElementById("bs-carousel-controls");
+    var steps = getActiveSteps();
+
+    if (!controls || !steps || !isMobileViewport()) return;
+
+    controls.style.top = steps.offsetTop + steps.offsetHeight / 2 + "px";
+  }
+
+  function updateCarouselControls() {
+    var controls = document.getElementById("bs-carousel-controls");
+    var prev = document.getElementById("bs-carousel-prev");
+    var next = document.getElementById("bs-carousel-next");
+    var steps = getActiveSteps();
+    var cards = getCards(steps);
+
+    if (!controls || !prev || !next || !steps || !cards.length) return;
+
+    if (!isMobileViewport()) {
+      controls.style.display = "none";
+      return;
+    }
+
+    controls.style.display = "flex";
+    positionCarouselControls();
+
+    prev.style.opacity = carouselIndex[currentOS] === 0 ? ".45" : "1";
+    next.style.opacity =
+      carouselIndex[currentOS] === cards.length - 1 ? ".45" : "1";
+  }
+
+  // Keep the arrow state honest when the user swipes the strip by hand.
+  function bindCarouselScrollSync(steps) {
+    if (!steps || steps.__bsScrollBound) return;
+    steps.__bsScrollBound = true;
+
+    var timer = null;
+
+    steps.addEventListener(
+      "scroll",
+      function () {
+        clearTimeout(timer);
+        timer = setTimeout(function () {
+          var cards = getCards(steps);
+          if (!cards.length || !isMobileViewport()) return;
+
+          var center = steps.scrollLeft + steps.clientWidth / 2;
+          var closest = 0;
+          var best = Infinity;
+
+          for (var i = 0; i < cards.length; i++) {
+            var cardCenter = cards[i].offsetLeft + cards[i].clientWidth / 2;
+            var distance = Math.abs(cardCenter - center);
+
+            if (distance < best) {
+              best = distance;
+              closest = i;
+            }
+          }
+
+          var os = steps.id === "bs-steps-android" ? "android" : "ios";
+
+          if (carouselIndex[os] !== closest) {
+            carouselIndex[os] = closest;
+            updateCarouselControls();
+          }
+        }, 120);
+      },
+      { passive: true }
+    );
+  }
+
+  function applyCarouselLayout() {
+    var allSteps = [
+      document.getElementById("bs-steps-ios"),
+      document.getElementById("bs-steps-android")
+    ];
+
+    allSteps.forEach(function (steps) {
+      if (!steps) return;
+
+      var os = steps.id === "bs-steps-android" ? "android" : "ios";
+      var cards = getCards(steps);
+
+      if (os !== currentOS) {
+        steps.style.setProperty("display", "none", "important");
+        return;
+      }
+
+      if (isMobileViewport()) {
+        steps.style.setProperty("display", "flex", "important");
+        steps.style.setProperty("overflow-x", "auto", "important");
+        steps.style.setProperty("scroll-snap-type", "x mandatory", "important");
+        steps.style.setProperty("scroll-behavior", "smooth", "important");
+        steps.style.setProperty("-webkit-overflow-scrolling", "touch", "important");
+        steps.style.setProperty("gap", "18px", "important");
+        steps.style.setProperty("padding", "0 28px 12px", "important");
+
+        cards.forEach(function (card) {
+          card.style.setProperty("flex", "0 0 84%", "important");
+          card.style.setProperty("max-width", "84%", "important");
+          card.style.setProperty("scroll-snap-align", "center", "important");
+        });
+
+        bindCarouselScrollSync(steps);
+        scrollToCarouselIndex(false);
+      } else {
+        steps.style.setProperty("display", "grid", "important");
+        steps.style.removeProperty("overflow-x");
+        steps.style.removeProperty("scroll-snap-type");
+        steps.style.removeProperty("scroll-behavior");
+        steps.style.removeProperty("-webkit-overflow-scrolling");
+        steps.style.removeProperty("padding");
+
+        if (os === "android") {
+          steps.style.setProperty(
+            "grid-template-columns",
+            "repeat(auto-fit,minmax(min(100%,240px),1fr))",
+            "important"
+          );
+          steps.style.setProperty("gap", "20px", "important");
+        } else {
+          steps.style.setProperty(
+            "grid-template-columns",
+            "repeat(auto-fit,minmax(min(100%,260px),1fr))",
+            "important"
+          );
+          steps.style.setProperty("gap", "28px", "important");
+        }
+
+        cards.forEach(function (card) {
+          card.style.removeProperty("flex");
+          card.style.removeProperty("max-width");
+          card.style.removeProperty("scroll-snap-align");
+        });
+      }
+    });
+
+    updateCarouselControls();
+  }
+
+  function scrollToCarouselIndex(smooth) {
+    var steps = getActiveSteps();
+    var cards = getCards(steps);
+    var index = carouselIndex[currentOS];
+
+    if (!steps || !cards.length || !cards[index] || !isMobileViewport()) return;
+
+    var card = cards[index];
+    var left = card.offsetLeft - (steps.clientWidth - card.clientWidth) / 2;
+
+    steps.scrollTo({
+      left: Math.max(0, left),
+      behavior: smooth ? "smooth" : "auto"
+    });
+
+    updateCarouselControls();
+  }
+
+  function moveCarousel(direction) {
+    var cards = getCards(getActiveSteps());
+
+    if (!cards.length) return;
+
+    carouselIndex[currentOS] = Math.max(
+      0,
+      Math.min(cards.length - 1, carouselIndex[currentOS] + direction)
+    );
+
+    scrollToCarouselIndex(true);
+  }
+
+  function setBetSnipeOS(os) {
+    var iosSteps = document.getElementById("bs-steps-ios");
+    var androidSteps = document.getElementById("bs-steps-android");
+    var iosButton = document.getElementById("bs-btn-ios");
+    var androidButton = document.getElementById("bs-btn-android");
+
+    if (!iosSteps || !androidSteps || !iosButton || !androidButton) {
+      log("switcher: missing elements");
+      return;
+    }
+
+    currentOS = os === "android" ? "android" : "ios";
+
+    styleButton(iosButton, currentOS === "ios");
+    styleButton(androidButton, currentOS === "android");
+    iosButton.setAttribute("aria-selected", String(currentOS === "ios"));
+    androidButton.setAttribute("aria-selected", String(currentOS === "android"));
+
+    applyCarouselLayout();
+  }
+
+  function scrollToGuide() {
+    var anchor = document.getElementById("bs-btn-ios");
+    var section = anchor && anchor.closest ? anchor.closest("section") : null;
+
+    (section || anchor || document.getElementById("betsnipe-app-page"))
+      .scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  /* ================================================================== *
+   * PART B - PWA install popup
+   * ================================================================== */
+
+  var sheetState = { root: null, lastFocus: null, mode: null };
+
+  function shareIconSvg() {
+    return (
+      '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true" style="display:block;">' +
+      '<path d="M12 3v12M12 3l-3.5 3.5M12 3l3.5 3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>' +
+      '<path d="M5 12v7.5a1.5 1.5 0 0 0 1.5 1.5h11a1.5 1.5 0 0 0 1.5-1.5V12" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>' +
+      "</svg>"
+    );
+  }
+
+  function closeIconSvg() {
+    return (
+      '<svg width="16" height="16" viewBox="0 0 20 20" fill="none" aria-hidden="true" style="display:block;">' +
+      '<path d="M5 5l10 10M15 5L5 15" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg>'
+    );
+  }
+
+  function stepRow(number, text) {
+    return (
+      '<li style="display:flex;align-items:flex-start;gap:12px;margin:0;padding:0;list-style:none;">' +
+      '<span style="flex:0 0 24px;width:24px;height:24px;border-radius:8px;background:' +
+      BRAND +
+      ';color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;line-height:1;">' +
+      number +
+      "</span>" +
+      '<span style="flex:1;min-width:0;font-size:15px;line-height:1.45;color:#0b0b0d;">' +
+      text +
+      "</span></li>"
+    );
+  }
+
+  function buildSheet(mode) {
+    refreshLocale();
+
+    var copy = T.modes[mode] || T.modes.native;
+
+    var overlay = document.createElement("div");
+    overlay.id = "bs-install-overlay";
+    overlay.setAttribute("role", "dialog");
+    overlay.setAttribute("aria-modal", "true");
+    overlay.setAttribute("aria-label", copy.title);
+    overlay.style.cssText = [
+      "position:fixed",
+      "inset:0",
+      "z-index:" + Z,
+      "display:flex",
+      "align-items:flex-end",
+      "justify-content:center",
+      "background:rgba(11,11,13,.55)",
+      "-webkit-backdrop-filter:blur(4px)",
+      "backdrop-filter:blur(4px)",
+      "opacity:0",
+      "transition:opacity .22s ease",
+      "font-family:'Noto Sans',Arial,Helvetica,sans-serif",
+      "-webkit-font-smoothing:antialiased"
+    ].join(";");
+
+    var sheet = document.createElement("div");
+    sheet.style.cssText = [
+      "position:relative",
+      "width:100%",
+      "max-width:460px",
+      "margin:0 auto",
+      "background:#fff",
+      "color:#0b0b0d",
+      "border-radius:28px 28px 0 0",
+      "box-shadow:0 -8px 40px rgba(0,0,0,.28)",
+      "padding:26px 22px calc(22px + env(safe-area-inset-bottom,0px))",
+      "transform:translateY(16px)",
+      "transition:transform .26s cubic-bezier(.22,1,.36,1)",
+      "max-height:88vh",
+      "overflow-y:auto",
+      "box-sizing:border-box"
+    ].join(";");
+
+    var stepsHtml = "";
+
+    if (copy.steps && copy.steps.length) {
+      var rows = "";
+
+      for (var i = 0; i < copy.steps.length; i++) {
+        rows += stepRow(i + 1, copy.steps[i]);
+      }
+
+      stepsHtml =
+        '<ul style="margin:18px 0 0;padding:0;display:flex;flex-direction:column;gap:14px;">' +
+        rows +
+        "</ul>";
+    }
+
+    // Safari's share control is the one thing users hunt for; show it.
+    var hintHtml =
+      mode === "ios"
+        ? '<div style="margin-top:18px;display:flex;align-items:center;gap:10px;background:#f8f9fa;border:1px solid rgba(0,0,0,.06);border-radius:14px;padding:12px 14px;color:' +
+          MUTED +
+          ';font-size:13px;line-height:1.4;">' +
+          '<span style="flex:0 0 auto;color:#007aff;">' +
+          shareIconSvg() +
+          "</span><span>" +
+          (localeKey() === "pt"
+            ? "Este é o ícone Partilhar do Safari."
+            : "This is the Safari Share icon.") +
+          "</span></div>"
+        : "";
+
+    var secondaryHtml = copy.secondary
+      ? '<button type="button" data-bs-role="secondary" style="border:0;background:transparent;cursor:pointer;font-family:inherit;font-size:15px;font-weight:500;color:' +
+        MUTED +
+        ';padding:12px 8px;width:100%;">' +
+        copy.secondary +
+        "</button>"
+      : "";
+
+    sheet.innerHTML =
+      '<button type="button" data-bs-role="close" aria-label="' +
+      T.close +
+      '" style="position:absolute;top:16px;right:16px;width:32px;height:32px;border:0;border-radius:999px;background:#f1f2f4;color:' +
+      MUTED +
+      ';display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;">' +
+      closeIconSvg() +
+      "</button>" +
+      '<div style="display:flex;align-items:center;gap:14px;padding-right:40px;">' +
+      '<img data-bs-role="icon" src="' +
+      APP_ICON +
+      '" alt="" width="56" height="56" style="display:block;width:56px;height:56px;border-radius:14px;border:1px solid rgba(0,0,0,.06);flex:0 0 auto;">' +
+      '<div style="min-width:0;">' +
+      '<div style="font-size:17px;font-weight:600;line-height:1.2;">BetSnipe</div>' +
+      '<div style="font-size:13px;color:' +
+      MUTED +
+      ';line-height:1.3;margin-top:2px;">' +
+      T.brandSub +
+      "</div></div></div>" +
+      '<h3 style="margin:22px 0 0;padding:0;font-size:21px;font-weight:600;line-height:1.25;letter-spacing:-.3px;">' +
+      copy.title +
+      "</h3>" +
+      '<p style="margin:10px 0 0;padding:0;font-size:15px;line-height:1.55;color:' +
+      MUTED +
+      ';">' +
+      copy.body +
+      "</p>" +
+      stepsHtml +
+      hintHtml +
+      '<button type="button" data-bs-role="primary" style="margin-top:22px;width:100%;border:0;cursor:pointer;font-family:inherit;font-size:17px;font-weight:600;color:#fff;background:' +
+      BRAND +
+      ";border-radius:16px;padding:16px 20px;box-shadow:0 6px 18px rgba(254,63,72,.32);transition:transform .15s ease,box-shadow .15s ease;\">" +
+      copy.primary +
+      "</button>" +
+      secondaryHtml;
+
+    overlay.appendChild(sheet);
+
+    // A missing icon should collapse quietly rather than render a broken image.
+    var icon = sheet.querySelector('[data-bs-role="icon"]');
+
+    if (icon) {
+      icon.addEventListener("error", function () {
+        icon.style.display = "none";
+      });
+    }
+
+    overlay.addEventListener("click", function (event) {
+      if (event.target === overlay) dismiss(SNOOZE_DAYS);
+    });
+
+    sheet
+      .querySelector('[data-bs-role="close"]')
+      .addEventListener("click", function () {
+        dismiss(SNOOZE_DAYS);
+      });
+
+    sheet
+      .querySelector('[data-bs-role="primary"]')
+      .addEventListener("click", function () {
+        onPrimary(mode, this);
+      });
+
+    var secondary = sheet.querySelector('[data-bs-role="secondary"]');
+
+    if (secondary) {
+      secondary.addEventListener("click", function () {
+        if (mode === "ios" || mode === "android-manual") {
+          closeSheet();
+          setBetSnipeOS(env.android ? "android" : "ios");
+          scrollToGuide();
+          return;
+        }
+
+        dismiss(SNOOZE_DAYS);
+      });
+    }
+
+    return { overlay: overlay, sheet: sheet };
+  }
+
+  function openSheet(mode) {
+    closeSheet(true);
+
+    var built = buildSheet(mode);
+
+    sheetState.root = built.overlay;
+    sheetState.mode = mode;
+    sheetState.lastFocus = document.activeElement;
+
+    document.body.appendChild(built.overlay);
+
+    // Force a reflow so the entry transition actually runs.
+    void built.overlay.offsetHeight;
+    built.overlay.style.opacity = "1";
+    built.sheet.style.transform = "translateY(0)";
+
+    var primary = built.sheet.querySelector('[data-bs-role="primary"]');
+    if (primary) primary.focus({ preventScroll: true });
+
+    document.addEventListener("keydown", onKeydown, true);
+    startSheetWatcher();
+    log("sheet open", mode);
+  }
+
+  function closeSheet(immediate) {
+    document.removeEventListener("keydown", onKeydown, true);
+
+    var root = sheetState.root;
+
+    sheetState.root = null;
+    sheetState.mode = null;
+
+    if (!root) return;
+
+    var restore = sheetState.lastFocus;
+    sheetState.lastFocus = null;
+
+    var remove = function () {
+      if (root.parentNode) root.parentNode.removeChild(root);
+      if (restore && restore.focus) {
+        try {
+          restore.focus({ preventScroll: true });
+        } catch (e) {}
+      }
+    };
+
+    if (immediate) {
+      remove();
+      return;
+    }
+
+    root.style.opacity = "0";
+    if (root.firstChild) root.firstChild.style.transform = "translateY(16px)";
+    setTimeout(remove, 240);
+  }
+
+  function onKeydown(event) {
+    if (event.key === "Escape" || event.keyCode === 27) {
+      event.stopPropagation();
+      dismiss(SNOOZE_DAYS);
+    }
+  }
+
+  function dismiss(days) {
+    snooze(days);
+    closeSheet();
+  }
+
+  function snooze(days) {
+    store.set(KEY_SNOOZE, String(Date.now() + days * 86400000));
+  }
+
+  function toast(message) {
+    var node = document.createElement("div");
+
+    node.textContent = message;
+    node.style.cssText = [
+      "position:fixed",
+      "left:50%",
+      "bottom:calc(28px + env(safe-area-inset-bottom,0px))",
+      "transform:translateX(-50%) translateY(8px)",
+      "z-index:" + (Z + 1),
+      "background:#0b0b0d",
+      "color:#fff",
+      "font-family:'Noto Sans',Arial,Helvetica,sans-serif",
+      "font-size:14px",
+      "padding:12px 18px",
+      "border-radius:999px",
+      "box-shadow:0 8px 24px rgba(0,0,0,.28)",
+      "opacity:0",
+      "transition:opacity .2s ease,transform .2s ease",
+      "pointer-events:none"
+    ].join(";");
+
+    document.body.appendChild(node);
+    void node.offsetHeight;
+    node.style.opacity = "1";
+    node.style.transform = "translateX(-50%) translateY(0)";
+
+    setTimeout(function () {
+      node.style.opacity = "0";
+      setTimeout(function () {
+        if (node.parentNode) node.parentNode.removeChild(node);
+      }, 240);
+    }, 2200);
+  }
+
+  function copyLink() {
+    var url = location.origin + location.pathname;
+
+    var fallback = function () {
+      var input = document.createElement("input");
+
+      input.value = url;
+      input.setAttribute("readonly", "readonly");
+      input.style.cssText = "position:fixed;top:-1000px;opacity:0;";
+      document.body.appendChild(input);
+      input.select();
+      input.setSelectionRange(0, url.length);
+
+      try {
+        document.execCommand("copy");
+      } catch (e) {}
+
+      document.body.removeChild(input);
+      toast(T.copied);
+    };
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(url).then(function () {
+        toast(T.copied);
+      }, fallback);
+      return;
+    }
+
+    fallback();
+  }
+
+  function onPrimary(mode, button) {
+    if (mode === "native") {
+      nativeInstall(button);
+      return;
+    }
+
+    if (mode === "ios-other" || mode === "inapp" || mode === "desktop") {
+      copyLink();
+      return;
+    }
+
+    if (mode === "ios" || mode === "android-manual") {
+      // "Got it" - park the popup and leave the on-page guide in place.
+      snooze(SNOOZE_DAYS);
+      closeSheet();
+      setBetSnipeOS(env.android ? "android" : "ios");
+      return;
+    }
+
+    closeSheet();
+  }
+
+  function nativeInstall(button) {
+    var deferred = getPrompt();
+
+    if (!deferred) {
+      // The event was consumed or never arrived - fall back to steps.
+      openSheet(env.android ? "android-manual" : "ios");
+      return;
+    }
+
+    // prompt() must be called synchronously inside the click handler,
+    // otherwise the user-gesture token is already spent.
+    var choice;
+
+    try {
+      choice = deferred.prompt();
+    } catch (e) {
+      log("prompt() threw", e);
+      setPrompt(null);
+      openSheet(env.android ? "android-manual" : "ios");
+      return;
+    }
+
+    if (button) {
+      button.disabled = true;
+      button.style.opacity = ".7";
+      button.textContent = T.installing;
+    }
+
+    // A single beforeinstallprompt event can only be used once.
+    setPrompt(null);
+
+    Promise.resolve(choice || deferred.userChoice)
+      .then(function (result) {
+        var outcome = (result && result.outcome) || "dismissed";
+
+        log("userChoice", outcome);
+
+        if (outcome === "accepted") {
+          store.set(KEY_INSTALLED, "1");
+          openSheet("success");
+          return;
+        }
+
+        snooze(SNOOZE_DAYS_AFTER_DECLINE);
+        closeSheet();
+      })
+      .catch(function (error) {
+        log("userChoice failed", error);
+        closeSheet();
+      });
+  }
+
+  /* ------------------------------------------------------------------ *
+   * CTA buttons + auto popup
+   * ------------------------------------------------------------------ */
+  function bindCtas() {
+    refreshLocale();
+
+    var nodes = document.querySelectorAll("[data-bs-install]");
+
+    Array.prototype.forEach.call(nodes, function (node) {
+      if (node.__bsBound) return;
+      node.__bsBound = true;
+
+      if (!node.textContent.trim()) node.textContent = T.ctaLabel;
+
+      node.addEventListener("click", function (event) {
+        event.preventDefault();
+        openSheet(resolveMode());
+      });
+    });
+
+    return nodes.length;
+  }
+
+  function autoShowEligible() {
+    if (isInstalled()) return false;
+    if (store.get(KEY_INSTALLED) === "1") return false;
+    if (!env.mobile) return false;
+
+    var until = parseInt(store.get(KEY_SNOOZE) || "0", 10);
+
+    return !(until && Date.now() < until);
+  }
+
+  var autoScheduled = false;
+
+  function scheduleAutoShow() {
+    if (autoScheduled) return;
+    autoScheduled = true;
+
+    if (DEBUG) {
+      log("auto: debug mode, showing immediately", resolveMode());
+      setTimeout(function () {
+        openSheet(resolveMode());
+      }, 400);
+      return;
+    }
+
+    if (!autoShowEligible()) {
+      log("auto: suppressed");
+      return;
+    }
+
+    var done = false;
+
+    var show = function show(why) {
+      if (done) return;
+      if (!autoShowEligible()) return;
+      if (sheetState.root) return;
+
+      // Deferred until the tab is in front. Re-enter through show() instead
+      // of opening directly, so the guards above run again - a tab that was
+      // backgrounded must not pop the sheet over an already-open one, or
+      // over a sheet the visitor has since dismissed.
+      if (document.hidden) {
+        document.addEventListener(
+          "visibilitychange",
+          function () {
+            show(why);
+          },
+          { once: true }
+        );
+        return;
+      }
+
+      done = true;
+      log("auto: showing", why, resolveMode());
+      openSheet(resolveMode());
+    };
+
+    // The native prompt is the best outcome, so give it a head start.
+    window.addEventListener(
+      "bs:installable",
+      function () {
+        setTimeout(function () {
+          show("installable");
+        }, 900);
+      },
+      { once: true }
+    );
+
+    setTimeout(function () {
+      show("timeout");
+    }, env.android ? AUTO_DELAY_ANDROID : AUTO_DELAY_IOS);
+  }
+
+  window.addEventListener("bs:installed", function () {
+    if (sheetState.root && sheetState.mode !== "success") openSheet("success");
+  });
+
+  // The event can arrive after we have already fallen back to manual steps -
+  // the app-page script tag is injected around 1s into the page, so we do not
+  // get to choose whether we are listening in time. If a manual sheet is open
+  // when it lands, swap it for the real installer rather than making the
+  // visitor follow instructions they no longer need.
+  window.addEventListener("bs:installable", function () {
+    if (!sheetState.root) return;
+    if (sheetState.mode !== "android-manual" && sheetState.mode !== "desktop") return;
+    if (!getPrompt()) return;
+
+    log("late install event: upgrading", sheetState.mode, "-> native");
+    openSheet("native");
+  });
+
+  /* ------------------------------------------------------------------ *
+   * Boot
+   * ------------------------------------------------------------------ */
+  var resizeTimer = null;
+
+  window.addEventListener("resize", function () {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(applyCarouselLayout, 150);
+  });
+
+  // The app page is a route inside an Angular SPA. If the visitor navigates
+  // away, tear the popup down instead of leaving it floating over the app.
+  // Runs only while a sheet is actually open - this file loads on every page,
+  // so it must not leave a permanent timer behind.
+  var sheetWatcher = null;
+
+  function startSheetWatcher() {
+    if (sheetWatcher) return;
+    if (!document.getElementById("betsnipe-app-page")) return;
+
+    sheetWatcher = setInterval(function () {
+      if (!sheetState.root) {
+        clearInterval(sheetWatcher);
+        sheetWatcher = null;
+        return;
+      }
+
+      if (document.getElementById("betsnipe-app-page")) return;
+
+      log("page left, closing sheet");
+      closeSheet(true);
+    }, 1000);
+  }
+
+  function bindPage() {
+    var page = document.getElementById("betsnipe-app-page");
+    var iosButton = document.getElementById("bs-btn-ios");
+    var androidButton = document.getElementById("bs-btn-android");
+
+    if (!page || !iosButton || !androidButton) return false;
+
+    boundPage = page;
+
+    createCarouselControls();
+
+    iosButton.onclick = function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+      carouselIndex.ios = 0;
+      setBetSnipeOS("ios");
+      return false;
+    };
+
+    androidButton.onclick = function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+      carouselIndex.android = 0;
+      setBetSnipeOS("android");
+      return false;
+    };
+
+    // Open on the tab that matches the visitor's device.
+    setBetSnipeOS(env.android ? "android" : "ios");
+
+    bindCtas();
+    scheduleAutoShow();
+
+    log("bound", {
+      version: VERSION,
+      locale: localeKey(),
+      mode: resolveMode(),
+      env: env
+    });
+
+    return true;
+  }
+
+  var boundPage = null;
+  var burstTimer = null;
+  var routeHooked = false;
+
+  function tryBind() {
+    var page = document.getElementById("betsnipe-app-page");
+
+    if (!page) {
+      boundPage = null;
+      return false;
+    }
+
+    // Already wired to this exact element - nothing to redo.
+    if (page === boundPage) return true;
+
+    return bindPage();
+  }
+
+  // The CMS injects the block asynchronously, so the element is rarely there
+  // on the first look. Poll in short bursts after load and after every route
+  // change rather than once for a fixed window: this file may be loaded
+  // site-wide in <head>, where the visitor can reach /app minutes later.
+  function bindBurst(duration) {
+    clearInterval(burstTimer);
+
+    if (tryBind()) return;
+
+    var deadline = Date.now() + (duration || 10000);
+
+    burstTimer = setInterval(function () {
+      if (tryBind() || Date.now() > deadline) clearInterval(burstTimer);
+    }, 250);
+  }
+
+  function hookRouteChanges() {
+    if (routeHooked) return;
+    routeHooked = true;
+
+    var onRouteChange = function () {
+      bindBurst(10000);
+    };
+
+    window.addEventListener("popstate", onRouteChange);
+    window.addEventListener("hashchange", onRouteChange);
+
+    // Angular routes with the History API, which fires no event of its own.
+    ["pushState", "replaceState"].forEach(function (method) {
+      var original = history[method];
+
+      if (typeof original !== "function") return;
+
+      history[method] = function () {
+        var result = original.apply(this, arguments);
+
+        try {
+          onRouteChange();
+        } catch (e) {}
+
+        return result;
+      };
+    });
+  }
+
+  function boot() {
+    if (/[?&]bsreset=1/.test(location.search)) {
+      store.remove(KEY_SNOOZE);
+      store.remove(KEY_INSTALLED);
+      log("state reset");
+    }
+
+    hookRouteChanges();
+    bindBurst(10000);
+  }
+
+  window.__betsnipeApp = {
+    version: VERSION,
+    boot: boot,
+    open: function (mode) {
+      openSheet(mode || resolveMode());
+    },
+    close: closeSheet,
+    install: function () {
+      nativeInstall(null);
+    },
+    setOS: setBetSnipeOS,
+    debug: function () {
+      return {
+        version: VERSION,
+        locale: localeKey(),
+        env: env,
+        mode: resolveMode(),
+        installed: isInstalled(),
+        promptCaptured: !!getPrompt(),
+        snoozeUntil: store.get(KEY_SNOOZE),
+        installedFlag: store.get(KEY_INSTALLED)
+      };
+    }
+  };
+
+  // Back-compat with the v2 globals.
+  window.setBetSnipeOS = setBetSnipeOS;
+  window.moveBetSnipeCarousel = moveCarousel;
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", boot);
+  } else {
+    boot();
+  }
+})();
