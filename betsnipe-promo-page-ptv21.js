@@ -523,7 +523,7 @@
 <li>O <strong>rollover</strong> da Aposta Grátis é de <strong>1x</strong>:
 <ul>
 <li>cada <strong>Aposta Grátis</strong> deve ser utilizada <strong>numa aposta qualificada uma vez</strong>;</li>
-<li>os <strong>ganhos</strong> obtidos com a <strong>Aposta Grátis</strong> são <strong>creditados</strong> como <strong>saldo real</strong> com um <strong>requisito</strong> de aposta (rollover) adicional de 1x antes de poderem ser levantados.</li>
+<li>Os <strong>ganhos líquidos</strong> obtidos com uma <strong>Aposta Grátis</strong> estão sujeitos a um <strong>rollover adicional de 1x</strong>, que deve ser cumprido <strong>exclusivamente na secção de Apostas Desportivas</strong> antes do levantamento.</li>
 </ul>
 </li>
 <li>A <strong>Aposta Grátis</strong> funciona como uma aposta com saldo real em que o <strong>valor da aposta não é devolvido</strong>:
@@ -572,11 +572,33 @@
         {
           title: "Utilização e Requisitos de Aposta",
           content: `<ul>
-<li>Só contam <strong>apostas múltiplas</strong> com <strong>3 seleções de odd mínima 1.40</strong>.</li>
-<li>O rollover da Aposta Grátis é de <strong>1x</strong>.</li>
-<li>Os ganhos ficam sujeitos a rollover adicional de 1x.</li>
-<li>A Aposta Grátis não pode ser utilizada em Cash Out.</li>
-<li>A validade da Aposta Grátis é de <strong>1 dia</strong>.</li>
+ <li>Only <strong>multiple bets</strong> with <strong>3 selections, each with minimum odds of 1.40</strong>, on Football, Basketball or Tennis markets are eligible.</li>
+
+  <li>The <strong>Free Bet rollover</strong> is <strong>1x:</strong>
+    <ul style="padding-left:20px;">
+      <li>each <strong>Free Bet</strong> must be used <strong>once on a qualifying bet</strong>;</li>
+      <li>the <strong>winnings</strong> obtained from the <strong>Free Bet</strong> are <strong>credited</strong> as <strong>real balance</strong> and are subject to an additional <strong>1x wagering requirement (rollover)</strong> before they can be withdrawn, on a bet with <strong>minimum odds of 1.40</strong>.</li>
+    </ul>
+  </li>
+
+  <li>The <strong>net winnings</strong> obtained from a <strong>Free Bet</strong> are subject to an additional <strong>1x wagering requirement</strong>, which must be fulfilled <strong>exclusively in the Sports Betting section</strong> before withdrawal.</li>
+
+  <li>The <strong>Free Bet</strong> works like a real-balance bet where the <strong>stake amount is not returned:</strong>
+    <ul style="padding-left:20px;">
+      <li>if the bet is <strong>lost</strong>, the <strong>Free Bet</strong> is lost;</li>
+      <li>if the bet is <strong>won</strong>, only the <strong>profit, up to a maximum amount equal to the value of the Free Bet,</strong> is credited as <strong>real balance</strong> — the nominal value of the <strong>Free Bet</strong> is not returned.</li>
+    </ul>
+  </li>
+
+  <li>The <strong>Free Bet</strong> cannot be used with <strong>full or partial Cash Out.</strong></li>
+
+  <li><strong>Voided, cancelled, refunded bets or bets with full or partial Cash Out</strong> do not count towards the <strong>Free Bet</strong> usage requirement.</li>
+
+  <li>Only <strong>settled bets</strong> count for the purposes of <strong>winnings</strong> and fulfilment of the <strong>rollover.</strong></li>
+
+  <li>The <strong>Free Bet</strong> has a <strong>limited validity period of 1 day.</strong></li>
+
+  <li><strong>Withdrawals</strong> are not permitted while the <strong>Free Bet</strong> is active and has not been used in accordance with these terms.</li>
 </ul>`
         },
         {
@@ -622,8 +644,10 @@
           content: `<ul>
 <li>Cada Rodada Grátis tem um valor fixo de <strong>0,10€.</strong></li>
 <li>As Rodadas Grátis só podem ser utilizadas no jogo Starburst.</li>
+<li>O jogador dispõe de 2 dias para utilizar as Rodadas Grátis após o crédito.</li>
 <li>Os ganhos estão sujeitos a rollover de <strong>1x</strong>.</li>
 <li>Após cumprires o rollover, os ganhos passam para saldo real.</li>
+<li>Os ganhos obtidos através de um Bónus de Casino, incluindo Rodadas Grátis, são creditados como saldo real, mas ficam sujeitos a um requisito de aposta (rollover) adicional equivalente a 1x o valor desses ganhos. Este requisito deve ser cumprido exclusivamente na secção de Casino, através de apostas em jogos elegíveis ao abrigo dos termos da promoção aplicável, antes de os ganhos poderem ser levantados.</li>
 </ul>`
         },
         {
