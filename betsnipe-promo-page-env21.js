@@ -722,24 +722,33 @@
           title:
             "Use and Wagering Requirements",
           content: `<ul>
-<li>Only <strong>multiple bets</strong> with <strong>3 selections, each with minimum odds of 1.40</strong>, on <strong>Football, Basketball</strong> or <strong>Tennis</strong> markets qualify.</li>
-<li>The <strong>Free Bet rollover</strong> is <strong>1x</strong>:
-  <ul>
-    <li>each <strong>Free Bet</strong> must be used <strong>once on a qualifying bet</strong>;</li>
-    <li><strong>winnings</strong> obtained from the <strong>Free Bet</strong> are <strong>credited</strong> as <strong>real balance</strong> with an additional <strong>1x wagering requirement</strong> before they can be withdrawn.</li>
-  </ul>
-</li>
-<li>The <strong>Free Bet</strong> works like a real-money bet where the <strong>stake amount is not returned</strong>:
-  <ul>
-    <li>if the bet <strong>loses</strong>, the Free Bet is lost;</li>
-    <li>if the bet <strong>wins</strong>, only the <strong>profit, up to a maximum equal to the value of the Free Bet</strong>, is credited as <strong>real balance</strong> — the nominal value of the <strong>Free Bet</strong> is not returned.</li>
-  </ul>
-</li>
-<li>The <strong>Free Bet</strong> cannot be used with <strong>full or partial Cash Out.</strong></li>
-<li><strong>Voided, cancelled, refunded bets or bets with Cash Out</strong> (full or partial) <strong>do not count</strong> towards the Free Bet usage requirement.</li>
-<li>Only <strong>settled bets</strong> (with a confirmed result) count towards <strong>winnings</strong> and completion of the <strong>rollover.</strong></li>
-<li>The <strong>Free Bet</strong> is valid for <strong>1 day</strong> from the date it is credited; after this period, if it has not been used, it expires and is <strong>removed from the account.</strong></li>
-<li><strong>Withdrawals</strong> are not permitted while the <strong>Free Bet</strong> is active and has not been used in accordance with these terms. However, the bonus may be cancelled on the terms and conditions page or automatically if a withdrawal is requested.</li>
+<li>Só contam <strong>apostas múltiplas</strong> com <strong>3 seleções de odd mínima 1.40</strong> em mercados de Futebol, Basquetebol ou Ténis.</li>
+
+  <li>O <strong>rollover da Aposta Grátis</strong> é de <strong>1x:</strong>
+    <ul style="padding-left:20px;">
+      <li>cada <strong>Aposta Grátis</strong> deve ser utilizada <strong>numa aposta qualificada uma vez</strong>;</li>
+      <li>os <strong>ganhos</strong> obtidos com a <strong>Aposta Grátis</strong> são <strong>creditados</strong> como <strong>saldo real</strong> com um <strong>requisito de aposta (rollover) adicional de 1x</strong> antes de poderem ser levantados, numa aposta com <strong>odd mínima de 1.40</strong>.</li>
+    </ul>
+  </li>
+
+  <li>Os <strong>ganhos líquidos</strong> obtidos com uma <strong>Aposta Grátis</strong> estão sujeitos a um <strong>rollover adicional de 1x</strong>, que deve ser cumprido <strong>exclusivamente na secção de Apostas Desportivas</strong> antes do levantamento.</li>
+
+  <li>A <strong>Aposta Grátis</strong> funciona como uma aposta com saldo real em que o <strong>valor da aposta não é devolvido:</strong>
+    <ul style="padding-left:20px;">
+      <li>se a aposta for <strong>perdedora</strong>, a <strong>Aposta Grátis</strong> é perdida;</li>
+      <li>se a aposta for <strong>vencedora</strong>, apenas o <strong>lucro, até um limite máximo igual ao valor da Aposta Grátis,</strong> é creditado como <strong>saldo real</strong> — o valor nominal da <strong>Aposta Grátis</strong> não é devolvido.</li>
+    </ul>
+  </li>
+
+  <li>A <strong>Aposta Grátis</strong> não pode ser utilizada em <strong>Cash Out total ou parcial.</strong></li>
+
+  <li><strong>Apostas anuladas, canceladas, devolvidas ou com Cash Out (total ou parcial)</strong> não contam para o requisito de utilização da <strong>Aposta Grátis.</strong></li>
+
+  <li>Só <strong>apostas liquidadas</strong> contam para efeitos de <strong>ganhos</strong> e cumprimento do <strong>rollover.</strong></li>
+
+  <li>A <strong>Aposta Grátis</strong> tem uma <strong>validade limitada de 1 dia.</strong></li>
+
+  <li>Não são permitidos <strong>levantamentos</strong> enquanto a <strong>Aposta Grátis</strong> estiver ativa e não tiver sido utilizada de acordo com estes termos.</li>
 </ul>`
         },
 
@@ -860,6 +869,7 @@
 <li>Winnings obtained from Free Spins are subject to a <strong>1x wagering requirement (rollover)</strong>.</li>
 <li>Once the rollover has been completed, the winnings are transferred directly to the real balance.</li>
 <li>If the rollover is not completed within the validity period, the Free Spins and associated winnings will be voided.</li>
+<li>Winnings obtained through a <strong>Casino Bonus</strong>, including <strong>Free Spins</strong>, are credited as real balance but are subject to an additional wagering requirement (rollover) equivalent to <strong>1x the value of those winnings</strong>. This requirement must be fulfilled <strong>exclusively in the Casino section</strong> through wagers placed on eligible games in accordance with the terms of the applicable promotion, before the winnings can be withdrawn.</li>
 </ul>`
         },
 
@@ -959,6 +969,7 @@
 <li>The Free Spins are subject to a 1x wagering requirement (rollover).</li>
 <li>The player has <strong>1 day</strong> to use the Free Spins after they are credited.</li>
 <li>Winnings obtained from Free Spins are paid directly into the real balance.</li>
+<li>Winnings obtained through a <strong>Casino Bonus</strong>, including <strong>Free Spins</strong>, are credited as real balance but are subject to an additional wagering requirement (rollover) equivalent to <strong>1x the value of those winnings</strong>. This requirement must be fulfilled <strong>exclusively in the Casino section</strong> through wagers placed on eligible games in accordance with the terms of the applicable promotion, before the winnings can be withdrawn.</li>
 <li>The <strong>maximum total winnings</strong> that can be converted into real balance through this promotion are <strong>€30.</strong></li>
 <li>Any winnings above this limit will be removed at the time of conversion.</li>
 </ul>`
